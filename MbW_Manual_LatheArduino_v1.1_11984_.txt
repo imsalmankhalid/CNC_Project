@@ -1,0 +1,276 @@
+
+
+
+
+
+The Machine-by-Wire (MbW) Project
+User Manual:  Lathe
+
+Wade’O Design LLC
+Author:  Rob Wade
+Version:  01
+3/19/2019
+
+
+
+Contents
+1 Introduction	4
+1.1 Audience	4
+1.2 Goal of this ‘User Manual’	5
+1.3 Disclaimer / Safety	5
+1.4 Limitations	5
+2 System Overview	6
+2.1 Lathe Layout	6
+2.2 Parts List	7
+2.3 Electrical Schematic	8
+2.4 Arduino Mega Pin Outs	9
+2.5 Mechanical Considerations	9
+3 User Interface Module (LCD & Buttons)	10
+3.1 LCD Wiring	10
+3.2 LCD Backlight	10
+3.3 LCD I2C Address	10
+3.4 Button Wiring	11
+4 Electronic Feed Module (HandWheel Encoders & Half Nut)	11
+4.1 Encoder Wiring	11
+4.2 Encoder setting	11
+4.3 Half Nut wiring	11
+5 Electronic Gear Box Module (Changeover Switch, Potentiometer & Index)	12
+5.1 Changeover Switch wiring	12
+5.2 Potentiometer Wiring	12
+5.3 Index Pulse Card Wiring	12
+6 Control Box Module	13
+6.1 Wiring	13
+6.2 Debugging Inputs in code	13
+7 Operation of the lathe	14
+7.1 DRO Operation	14
+7.2 Half Nut Feed & Z-Stop function	14
+7.3 Threading	14
+7.4 Profiling	14
+7.5 Spheres	14
+8 Software	15
+8.1 The Arduino IDE	15
+8.2 Required Libraries (and contribution)	15
+8.3 Debugging	15
+8.4 A Look under the hood	15
+8.5 To Do List	15
+8.6 Change Log	15
+9 Extending lathe functionality to full CNC	16
+10 Notes: On manual content (todo list)	16
+20 Documentation Notes	16
+
+
+
+1 Introduction
+The MbW (Machine-by-Wire) project is the use of an electro-mechanical system for performing machine functions traditionally achieved by mechanical linkages.  I could have just called this “Another ELS Project” but feel the spirit of this project is more appropriately related to fly-by-wire or drive-by-wire from the aviation and automotive industries respectively.  It is important to note that the Arduino code used in the MbW project does not use traditional CNC software or GCode in any way – it is a custom electrical and software solution from the ground up.
+The main premise in this case is to replace a lathes conventional manual controls with an electronic interface.  The X and Z axis manual drive linkages are replaced by incremental encoders at the handwheels, the half nut engagement by a simple switch, and the gearbox is removed with its feed function replaced by servos and threading function (timing dial & geared connection to spindle) replaced with a photo transmitter reading a single index mark on the spindle.  These controls together with a user interface (LCD, 3 push buttons, & potentiometer) are converted to electronic signals transmitted ‘by wire’ to an Arduino Mega where the software determines lathe movements.
+In all cases the original operator interfaces are retained as the guiding principal in this project is to completely retain the tactile feel and convenience of operating a manual lathe.  
+Some of the key benefits of implementing such a system are listed below.
+* A DRO is implemented without requiring linear scales
+* Allows variable feed rate beyond the limitation of fixed gears
+* Remove operation of changing gears for feed and threading operations
+* Z axis limit stop is available without mechanical hardware
+* Automated external threading operation (internal on todo list)
+* Automated turning operations from simple turning to complex forms including tapers.
+* Automated radius and sphere turning  
+* Compound can be replaced with solid tool post (software eliminates need)
+* All the benefits of typical CNC conversions including reduced backlash, eliminated backdrive, etc
+* No complex CNC software or CAM knowledge is necessary 
+* Extendable electronics configuration allows CNC software to work side-by-side with MbW.
+Visit my youtube channel WadeODesign to see an overview of the lathe conversion and functions.
+1.1 Audience
+There are two audiences which will find interest in the MbW project.  
+1) A manual lathe owner who desires the simplicity and uncomplicated aspect of the MbW control system to improve and expand on typical manual lathe operations.  Maybe not yet ready for learning the ins and outs of complicated CNC software and/or CAM programing.  
+2) An existing CNC lathe owner who is tired of the complexity of CNC and CAM overhead to perform everyday simple lathe operations.  Maybe you miss the days of walking up to your lathe, chucking a part up, and quickly taking a simple chamfer or turning down a diameter without turning on a computer.
+1.2 Goal of this ‘User Manual’
+1. Detail the electrical configuration, wiring, and specific pin-outs required to use the MbW Arduino code on a lathe.  
+2. Explain various hardware settings (motors, encoders, LCD, mechanical ratios) required to use the MbW code and how to accommodate minor variations from the recommended setup.
+3. Describe how to use the UI to perform basic operations of threading, profiling, spheres, and DRO functions.
+This project is NOT a ‘plug and play’ set of hardware which can be added to a Lathe.  I’m not selling a hardware product nor a step-by-step guide.  The mechanical conversion for a lathe is NOT covered in this manual and considered a prerequisite.  In addition, the physical mounting of the electrical components shown in section “2.1 Schematic overview” are not covered in this manual.  If you would like to obtain information on the mechanical conversion and how to mount these components you can obtain full CAD files, bill of material, and brief design detail description by visiting my website and downloading the available documentation.  Note that all documentation for both my G0752/G0602 benchtop Lathe and custom CNC Fixed Gantry Router builds have a price listed ….. BUT I’ve set this up so that you can simply remove any (or all) dollar values with a coupon code – essentially making all this information “pay what you want” (donation style).  This manual I’ve chosen to charge a required base price due to the specific effort required to support the open source code.  Thanks for your support!!
+1.3 Disclaimer / Safety
+Any machine tool is potentially dangerous and computer controlled machined are potentially more dangerous than manual ones.  It is your responsibility for the performance of any machine or any damage or injury caused by its use.  It is your responsibility to ensure that you understand the implications of what you design and build and to comply with any legislation and codes of practice applicable to your country or state.  If you are in any doubt, be sure to seek guidance from a professionally qualified expert rather than risk injury to yourself or to others.
+WadeODesign LLC has made all reasonable efforts to accurately present the information in this published documentation and shall not be responsible for any incorrect information which may result from oversights.
+Note that the open source Arduino code available for this project is not being sold nor distributed directly from WadeODesign but is available with no guarantee as an open source project.  Use at your own risk.
+1.4 Limitations
+The Arduino code used for the MbW project is currently limited to work with Clearpath servo motors.  This limitation is because; 1) Arduino Libraries for Clearpath servo motion control where readily available, and 2) The RAS function of the Clearpath servo motion controller is well suited to handle certain aspects of my code.  It is on my ‘to-do’ list to determine if other brand motors could be used with my code.
+Due to relatively slow processing power of the 16 MHz Arduino single core processor there are some minor limitations which must be mentioned.  First, the X and Z axis handweel motion cannot be performed simultaneously.  The operation of the handwheels can be done together but the code will only recognize and move the axis which was initiated first.
+
+
+
+
+2 System Overview
+2.1 Lathe Layout
+
+
+
+The above layout diagram illustrates the modular approach taken with respect to the electrical configuration.  Three main modules, the “User Interface”, “Electronic Gearbox”, and “Electronic Feed” are packaged so that a single RJ45 Cat6 ethernet cable connects each module to the “Control Box”.  Note that the spindle motor and speed adjustment is colored gray which indicates that this function is not part of the MbW control system; and although it is suggested to have a VFD, it is not required for this project.  To see how I built and mounted these modules on my G0752 lathe conversion see my blog post here -> https://www.wadeodesign.com/cnc-lathe-design-details.html
+
+2.2 Parts List
+
+DescriptionQty.Manf.Order Code (Link)Notes / Mat'lMotor, ClearPath Servo2TeknicCPM-SDSK-2321S-RQNAny SDSK model motor allowed     Cable for Motor Signals, 8-pin Molex Mini-fit2TeknicCPM-CABLE-CTRL-MU120Or make custom     Cable for Motor Power, 4-pin Molex Mini-fit2TeknicCPM-CABLE-PWR-MS120Or make custom     Power Supply for Motor, 70v 7A1GeneriGenericFrom AmazonHandWheel Encoders, Rotary Incremental2CUIAMT103-VFrom Digikey     Cable for Encoder,  5Pin TYCO MTA-1002CUI435-1FTFrom DigikeyHalf Nut Limit Switch1OmronD2HW-C213MRFrom DigikeySpindle Index Pulse Card1AutoTechC3For Spindle Index     Optical Sensor2AutoTechC3Included in C3 purchasePotentiometer1Bournes3547S-1AA-103AFrom Digikey     Dial for Potentiometer1ApemMPKES90B14From DigikeySwitch, 3-Pos. Changeover1UxcellSZW26-25/D303.3From AmazonE-Stop Push Button Switch1Uxcella12082000ux0309From AmazonLCD Display, 20x4 I2C1FrentalyLYSB018V1Y40QFrom AmazonPush Button Switch, 2 pin momentary3FrentalyB015CYHS3UFrom Amazon (box of 10)Arduino Mega R31ArduinoMega R3From Amazon     Terminal Block Shield Board (optional)1WingoneerB01N2N7LZAFrom AmazonRelay Module, 2 Ch 5v1SunFounder2C-5VFrom AmazonTerminal Block, 3 Position9Phoenix Contact3044513From Digikey     Din Rail for Terminal Blocks1T&GD357A11-305From AmazonEthernet BrakeOut Board3Appsworld8P8CFrom AmazonPanel Mount RJ45 Ethernet Cable4ElectopRJ45 Panel Mnt x 30cmFrom AmazonPanel Mount USB-B Cable1StarTechUSBPNLBFBM1From AmazonCable Gland PG92TeenitorPG7 thru PG16 setFrom AmazonTerminal Rail, 5 Pos.3Cofufu6447782From AmazonThe above parts list represents only the components discussed in this User Manual.  More detailed parts list including mechanical components, enclosures, and pricing is available on my website www.wadeodesign.com.  Substitutions are possible but must maintain the same interface to the Arduino Mega.
+2.3 Electrical Schematic
+Below is the complete electrical schematic of the MbW project.  
+The electrical schematic above allows the use of two entirely independent control systems to be chosen by a change over switch.  This allows a lathe conversion implementing the MbW control system to be complemented by a full CNC software solution for more advanced work.  It is therefore possible (and likely most common) to implement only the MbW control system by simply removing the smoothstepper from the above schematic.
+As you can see in the above schematic the electrical components of the three main modules (E-Gearbox, E-Feed, & User Interface) are being powered with a 5v signal pushed back through the same ethernet cable which brings these modules signals to the main controller (Arduino Mega).
+NOTE:  The emergency stop wiring in the above diagram does NOT immediately stop the motors (some residual motion will occur).  In the future I will be changing this circuit to properly address this issue.
+2.4 Arduino Mega Pin Outs
+Below is the pin out table for the Arduino Mega.  Note that this code does not work with the Uno due to memory restrictions and the number of interrupts available.
+FunctionNoteColorMEGA PinoutButton #01Go DigitalBrownD:49Button #02Go DigitalBlueD:51Button #03Go DigitalYellowD:50Potentiometer (Wiper)W/GreenA:03LCD (SDA)Int / SDAPurpleD:20LCD (SCL)Int / SCLGrayD:21To Arduino RailBy A0Red5vTo Arduino RailBy A0BlackGNDX-Encoder Ch ‘A’InterruptBlueD:18Z-Encoder Ch ‘A’InterruptWhiteD:02Z-Encoder Ch ’B’New Int 18PurpleD:03X-Encoder Ch ’B’New Int 19BrownD:19X-Motor EnableBrownD:26Z-Motor EnableBrownD:27Z-Motor DirMUST USE per ClearpathWhiteD:22Z-Motor StepBlackD:23X-Motor DirMUST USE per ClearpathOrangeD:24X-Motor StepBlackD:25Switch, Half NutYellowD:08Spindle IndexGreenD:13To RelayBy SLA 2BlackGND
+I used a terminal block shield board from Wingoneer (see parts list) to make the wire connections to the Arduino Mega easier and more reliable. 
+2.5 Mechanical Considerations & User Variables
+The GbW code attempts to accommodate different mechanical components (ballscrew pitch, gear ratio, etc) and user preferences (handwheel graduation per revolution, etc) by allowing “User Variables” to be modified within the code.  With that said, there are limitations to how far away from the baseline design parameters (my original mechanical setup) the code can be modified and still be expected to perform properly.  
+Below is a list of the user variables in the code which can be modified.  See section 8.4 A Look under the hood for information on how the code implements these variables.  The corresponding values listed represent the baseline mechanical configuration which this code was developed and tested for.  
+zMtrPulley =      28;       # teeth on Z motor pulley
+zScrPulley =      28;       # teeth on Z screw pulley
+zScrPitch =       5.0;      Z lead screw pitch (mm)
+zHandwheel =      20.0;     Z linear motion (mm) per handwheel rev
+zEncCntPerRev =   2000;     Z encoder counts/rev
+zMtrCntPerRev =   800;      Z motor counts/rev (suggest NO change)
+xMtrPulley =      24;       # teeth on X motor pulley
+xScrPulley =      24;       # teeth on X screw pulley
+xScrPitch =       2.0;      X lead screw pitch (mm)
+xHandwheel =      2.0;      X linear motion (mm) per handwheel rev
+xEncCntPerRev =   2000;     X encoder counts/rev
+xMtrCntPerRev =   800;      X motor counts/rev (suggest NO change)
+spndlRpmMax =     2060.0;   Machine limit
+spndlRpmMin =     240.0;    Machine limit
+feedRateMin =     12.7;     Min feed rate mm/min (12.7=0.5 IPM)
+feedRateMax =     1270.0;   Max feed rate mm/min (1270.0=50 IPM)
+zMaxTravel =      1000;     Max z axis travel range (mm)
+mtrMinDelay =     600;      Clearpath min delay/cycle spec (suggest NO chg)
+thrdC391 =        13.860;   Thread setup tool offset (See Thread section)
+thrdAng =         27.5;     Modified thread feed angle
+thrdAutoSpr =     2;        # automatic thread spring passes
+dBug =            0;   	 Change this value 0->8 to initiate debug
+
+When determining a mechanical configuration there are a few key limits worth noting.  As the GbW project is all about duplicating a manual lathe performance, the below evaluation of required motion profiles is based on some common benchtop lathe specifications.  In general, the Z axis requirements will drive the min & max velocity profiles required by the motors while the X axis evaluation is focused on accuracy & resolution.  
+Z-Axis
+The Z axis has 3 main functions each with its own motion requirements.  With the halfnut engaged we have both cutting feeds (1) and threading (2) which are driven by the gearset while with the halfnut disengaged the handwheel drives the carriage with a rack and pinion drive (3).  
+A Typical range of longitudinal feeds specified for a benchtop lathe is 0.0025-0.0140 inch/rev (Grizzly G0752).  When this feedrate is associated to the corresponding typical spindle speeds for such a lathe of 200-2000 RPM the resultant velocity range which we must accommodate with our motor is 0.5 to 28 inch/min (as seen AT the carriage).  Threading of course falls into this speed range so we don’t need to consider this aspect into our evaluation.  
+For this particular lathe the handwheel graduation is 0.95 inch/rev and by multiplying this by our maximum physical turning test of 6 rev/sec we obtain a maximum carriage speed of 342 inch/min.  As you can see in comparison to the maximum feedrate, this will now become the maximum velocity our code should be able to handle.  As this value results in a rather crazy high carriage velocity it’s very unlikely a user would require such a speed and therefore we’ll bump this down a bit to 5 rev/sec at 1.0 inch/rev which results in 300 inch/min.
+X-Axis
+As the X axis does not have any feedrate drive with my ‘typical’ lathe example we’ll simple determine the maximum speed of the cross slide based on the handwheel graduation together again with our tested maximum rev/sec of the handle.  In my case the graduation is 0.06 inch/rev and together with 6 rev/sec results in a maximum cross slide velocity of 21.6 inch/rev.  
+
+Now it’s a long way from determining the motor velocity with the given requirement of 0.5 to 300 inch/min carriage travel.  We of course must now determine a mechanical configuration which together with limitation of the motor will produce this desired result.  Although to do this we must first look into the restrictions of the particular motor and Arduino controller.  
+We’ll be using, a Clearpath 
+
+In/rev * rev/min = in/rev.  .001*200=
+values of benchtop lathe longitudinal speeds are 
+
+specifications are listed below for these 3 motions with an assumed maximum spindle speed of 2000 RPM.  For determining the handwheel maximum speed I performed a simple test which pitted by ability to rotate the handwheel as fast as possible against a stop watch – this resulted in a maximum handwheel rotation of 6 rev/sec.
+
+0.0025 – 0.0140 in./rev.
+
+Standard Cutting speed = 
+Threading = 
+Handwheel “Rapids” = 
+
+motion specifications are listed below with a conversion into inch/min (IPM) and mm/min 
+X-Axis
+The X axis primary requirement is accuracy with its speed requirements falling well within the range  
+
+
+There are a few limits worth noting which must be considered when building a lathe conversion for the GbW project.  
+The first limitation is how fast we can request the motor to position the Z axis.  The Z axis must perform multiple motion profiles including standard cutting feedrates, “rapids” typically required from CNC operations, and handwheel input which mimicsfrom the handwheel.  This motion must mimic the high speed of the traditional rack and pinion motion of a lathe with the halfnut disengaged and is most always a higher requested motion profile than anyone would require the standard maximum Z axis feedrate even at CNC “rapids” conditions.  The code basis this limitation on a simple test which pitted my physical ability to rotate the handwheel against the stopwatch.  I determined that a maximum of 6 revolutions/sec is a maximum input 
+The X & Z axis has a number of motion profiles which must be considered.  Below I’ve broken down each axis based on typical 
+Z axis handwheel = maximum motor 
+Z axis minimum feedrate 
+Encoder settings = Count/Revolution limit
+
+
+
+
+
+3 User Interface Module (LCD & Buttons)
+Along with proper wiring, there are two important setup steps to get the LCD properly working with the MbW code (see Backlight and I2C address below).
+See this youtube video for info on the LCD -> https://youtu.be/B8DNokj9LnY 
+3.1 LCD Wiring
+The LCD used in this project is an I2C communication type with 4 display lines allowing 20 characters per line.  I recommend a “Sunfounder I2C LCD 2004” but many others exist.  The below youtube video provides a nice overview of this module.
+3.2 LCD Backlight
+
+3.3 LCD I2C Address
+The 20x4 LCD used for this project implements an I2C communication protocol to receive information from the Arduino.  As the I2C address is not the same for all modules, you may need to change a value in the code if the LCD does not initially work.  Hopefully it’s as simple as just trying a couple of the most common addresses as shown in the figure below – just open the code in the Arduino IDE and change the address text in line 41 to either 0x27 or 0x3F.  It this does not work you’ll need to head on over to http://playground.arduino.cc/Main/I2cScanner and use the provided standalone code which will query your LCD module and let you know the address to use.
+
+3.4 Button Wiring
+See this youtube video for info on 2 wire buttons (I use the 1st method) -> https://youtu.be/TTqoKcpIWkQ 
+
+4 Electronic Feed Module (HandWheel Encoders & Half Nut)
+
+4.1 Encoder Wiring
+
+4.2 Encoder setting
+Place Excel file here?
+4.3 Half Nut wiring
+The half nut is operated by a simple switch which must be wired the same way as a button input on the LCD.  This is accomplished in my particular conversion by retaining the halfnut lever motion but replacing the mechanical linkage of actuating the halfnut motion to engage the screw with a simple toggle switch.  See this youtube video for info on 2 wire buttons (I use the 1st method) -> https://youtu.be/TTqoKcpIWkQ.  
+
+5 Electronic Gear Box Module (Changeover Switch, Potentiometer & Index)
+
+5.1 Changeover Switch wiring
+
+5.2 Potentiometer Wiring
+
+5.3 Index Pulse Card Wiring
+
+
+
+6 Control Box Module
+
+6.1 Wiring
+
+6.2 Debugging Inputs in code
+
+
+
+7 Operation of the lathe
+
+7.1 DRO Operation
+
+7.2 Half Nut Feed & Z-Stop function
+
+7.3 Threading
+
+Explain C391 tool and why
+
+7.4 Profiling
+
+7.5 Spheres
+
+
+
+
+8 Software
+In addition, as the MbW project is open source code and the desire is to allow contribution to improve and extend functionality within the DIY community, this manual will include some general notes on how the code is written.
+This manual will describe the proper setup and usage of an open source Arduino code which is published on GitHub.  
+8.1 The Arduino IDE
+
+8.2 Required Libraries (and contribution)
+
+8.3 Debugging
+
+8.4 A Look under the hood
+
+8.5 To Do List
+
+8.6 Change Log
+
+
+9 Extending lathe functionality to full CNC
+With that said, the electro-mechanical system employed is designed to co-exist together seamlessly with a full up traditional CNC control and software arrangement.  In other words, the project allows mechanical and electrical hardware used to create this conversion 
+this project is also an attempt to bridge the gap(s) between a manual lathe and a CNC lathe for the machinist.  The project is configured to allow a full CNC control system to coexist with the Arduino controller
+One – knowledge
+Two – convenience 
+
+10 Notes: On manual content (todo list)
+Overview of functions
+Software, installation, setup, LCD settings, user change, limitations
+
+Operation, handwheels, halfnut feed, z-stop, memory, zeroing, modes(threading, profile, sphere)
+Of course, by implementing such a system we can also extend the electronic interface to include a DRO and an operator interface which is used to both mimic the traditional functions of threading and feeding while extending functionality with the ability to create tapers and spheres.
+
+
+
+20 Documentation Notes
+Many images in this document are actually embedded “Object” (Excel and Powerpoint files) which can be directly viewed in the native MS application by right clicking the viewable image and selecting “Object->Open”  Alternatively, these files can be downloaded directly from my website www.wadeodesign.com.
+
+Page 2 of 2
+
+

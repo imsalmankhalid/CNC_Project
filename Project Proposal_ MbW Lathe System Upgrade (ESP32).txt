@@ -1,0 +1,57 @@
+﻿Project Proposal: MbW Lathe System Upgrade (ESP32)
+1. Project Objective
+The primary goal is to replace the existing Arduino Mega controller with a high-performance ESP32 to eliminate processing lag. The upgrade will ensure real-time responsiveness for dual encoders, add physical safety via limit switches, and provide a modern high-resolution color HMI.
+2. Methodology & Architecture
+To solve the "speed/performance" bottleneck, we will utilize the Dual-Core Architecture of the ESP32:
+* Core 0 (UI & Logic): Handles the HMI (ELECROW Touch Screen), system clock, and high-level state management.
+* Core 1 (Real-Time Motion): Dedicated exclusively to high-speed interrupt handling for the CUI AMT 103-V encoders and generating step/dir signals for the ClearPath SDSK servos. This prevents UI tasks from interfering with axis movement.
+3. Detailed Component List
+Category
+	Component
+	Specification / Note
+	Processor
+	ESP32-S3 Development Board
+	Dual-core 240MHz, 16MB Flash.
+	Display
+	ELECROW 7" HMI
+	800x480 Color Touch Screen (RGB/SPI).
+	Encoders
+	CUI AMT 103-V (x2)
+	Existing hardware; 3.3V logic compatible.
+	Servos
+	ClearPath SDSK (x2)
+	Brushless digital servos for X and Z axes.
+	Safety
+	Limit Switches (x4)
+	Normally Open (NO) for X+, X-, Z+, Z- limits.
+	Sensors
+	Index Pulse Card
+	AutoTech C3 for spindle sync during threading.
+	Inputs
+	10K Potentiometer
+	Precision Bourns for Half Nut feed speed control.
+	Control
+	3-Pos Toggle Switch
+	Added for Half Nut direction control (Z+ / Z-).
+	Logic
+	Level Shifters (4-Ch)
+	To bridge 3.3V ESP32 logic with 5V servo/sensor signals.
+	4. Technical Deliverables
+A. Software Migration & Optimization
+* Code Porting: Convert existing Arduino IDE (.ino) files to ESP32-compatible C++.
+* Dual-Core Implementation: Using FreeRTOS tasks to pin motion control to Core 1.
+* Limit Switch Logic: * Auto-Stop: Immediate hardware interrupt to halt servos upon trigger.
+   * Recovery Logic: Implementation of a "Back-off" mode allowing only reverse travel from a triggered switch.
+* HMI Upgrade: Custom UI design featuring a large Digital Readout (DRO), Feed-per-Revolution display, and a real-time system clock.
+B. Hardware Design
+* Wiring Diagram: A comprehensive schematic showing connections for the ESP32, ELECROW display, level shifters, and the interface to the ClearPath motor drivers.
+* Signal Integrity: Design includes pull-up/down resistors for encoders to prevent noise interference.
+5. Implementation Phases
+1. Phase 1: Procurement & Bench Setup (Days 1-2): Purchase ESP32, Display, and Switches. Set up the bench test environment.
+2. Phase 2: Firmware Core Migration (Days 3-4): Move the existing Mega logic to ESP32. Optimize encoder interrupts for high RPM.
+3. Phase 3: UI & Limit Switch Integration (Days 5-6): Develop the color HMI and integrate the stop/recovery logic.
+4. Phase 4: Testing & Documentation (Day 7): Stress test the system for "lag" under dual-encoder rotation. Finalize wiring guide and user manual.
+6. Project Terms
+* Total Budget: $700 USD (Labor/Development).
+* Hardware Costs: To be billed separately or purchased directly by the client.
+* Support: 6 months of bug fixes and minor software updates included.

@@ -1,0 +1,18 @@
+# ── Runtime GPIO / motor control ────────────────────────────────────────────
+pigpio>=1.78               # hardware-timed GPIO; requires pigpiod daemon on RPi
+RPi.GPIO>=0.7.1; platform_system=="Linux"
+
+# ── ADC (potentiometer) ──────────────────────────────────────────────────────
+adafruit-circuitpython-ads1x15>=2.3.4   # ADS1115 I2C ADC
+
+# ── UI ───────────────────────────────────────────────────────────────────────
+# PyQt5>=5.15.9  # Using system package (python3-pyqt5) instead
+
+# ── Utilities ────────────────────────────────────────────────────────────────
+numpy>=1.24.0
+
+# ── Testing / simulation (desktop) ───────────────────────────────────────────
+pytest>=7.4.0
+pytest-qt>=4.3.1
+pytest-mock>=3.12.0
+pytest-cov>=4.1.0
