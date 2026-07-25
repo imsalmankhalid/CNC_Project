@@ -77,8 +77,10 @@ GPIO_Z_DIR    = 27
 GPIO_Z_ENABLE = 22
 
 # X-axis servo
-GPIO_X_STEP   = 23
-GPIO_X_DIR    = 24
+# NOTE: STEP/DIR verified against test/enc_drive_motor.py (validated on real
+# hardware): X STEP=24, DIR=23.  Keep these in sync with that test.
+GPIO_X_STEP   = 24
+GPIO_X_DIR    = 23
 GPIO_X_ENABLE = 25
 
 # Buttons (active LOW – input pull-up)
@@ -95,9 +97,34 @@ GPIO_LIM_Z_MINUS = 7
 GPIO_LIM_X_PLUS  = 8
 GPIO_LIM_X_MINUS = 11
 
-# ADC (MCP3208 via SPI  –  or ADS1115 via I2C)
-ADC_BACKEND     = "ads1115"   # "mcp3208" | "ads1115" | "mock"
+# Master enable for limit switches.  Set to False for bench testing when no
+# limit switches are wired – otherwise a floating / NC / triggered limit pin
+# will silently block motion in that direction (e.g. a stuck Z+ limit blocks
+# all positive Z jog).  When False, all limit reads return "not triggered".
+LIMITS_ENABLED   = True
+
+# ADC (MCP3208 via SPI  –  or ADS1015/ADS1115 via I2C)
+# The validated hardware (test/enc_drive_motor.py) uses an ADS1015 on A0.
+ADC_BACKEND     = "ads1015"   # "mcp3208" | "ads1015" | "ads1115" | "mock"
 ADC_POT_CHANNEL = 0           # channel on the ADC chip
+POT_REF_VOLTAGE = 3.3         # pot reference voltage (5.0 if wired to 5V rail)
+
+# ── Debug / diagnostics ─────────────────────────────────────────────────────
+# When True the Pi 5 HAL emits debug logs (encoder/pot/step/button activity)
+# so hardware wiring can be verified against the display.  Can also be enabled
+# at runtime with the environment variable  LATHE_DEBUG_HAL=1
+DEBUG_HAL       = True
+
+# ── Logging ─────────────────────────────────────────────────────────────────
+# Diagnostic logs can be sent to the terminal (console) and/or a rotating log
+# file for later analysis.  Configure both independently here.
+LOG_TO_CONSOLE  = True                 # echo logs to the terminal / stderr
+LOG_TO_FILE     = True                 # also write logs to LOG_FILE
+LOG_FILE        = "logs/lathe.log"     # path (relative to project dir) or absolute
+LOG_LEVEL       = "DEBUG"               # "DEBUG" | "INFO" | "WARNING" | "ERROR"
+                                       # (forced to DEBUG when DEBUG_HAL/env is on)
+LOG_MAX_BYTES   = 8_000_000            # rotate the log file after ~8 MB
+LOG_BACKUP_COUNT = 3                   # keep this many rotated log files
 
 # ── Display ────────────────────────────────────────────────────────────────
 DISPLAY_WIDTH   = 800

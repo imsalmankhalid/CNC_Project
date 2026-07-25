@@ -15,6 +15,8 @@ from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QStackedWidget, QWidget,
 )
+from PyQt5.QtGui import QKeySequence
+from PyQt5.QtWidgets import QShortcut
 
 import config as cfg
 from ui.theme import STYLESHEET
@@ -46,20 +48,23 @@ def _create_hardware():
         # Auto-enable fullscreen on RPi unless already overridden
         if cfg.FULLSCREEN is False and "--windowed" not in sys.argv:
             cfg.FULLSCREEN = True
+        # Prefer the gpiozero/lgpio backend – this is the path validated against
+        # the physical hardware (test/enc_drive_motor.py) and the one that works
+        # on the Pi 5's RP1.  Fall back to the pigpio backend for older Pis.
         try:
-            from hal.rpi_interface import RpiInterface
-            hw = RpiInterface()
+            from hal.rpi5_interface import Rpi5Interface
+            hw = Rpi5Interface()
             hw.initialise()
             return hw
-        except Exception as exc:
-            print(f"[WARN] RPi pigpio interface init failed ({exc}) – trying RPi5/gpiozero interface")
+        except Exception as exc5:
+            print(f"[WARN] RPi5 gpiozero interface init failed ({exc5}) – trying pigpio interface")
             try:
-                from hal.rpi5_interface import Rpi5Interface
-                hw = Rpi5Interface()
+                from hal.rpi_interface import RpiInterface
+                hw = RpiInterface()
                 hw.initialise()
                 return hw
-            except Exception as exc5:
-                print(f"[WARN] RPi5 gpiozero interface init failed ({exc5}) – falling back to mock")
+            except Exception as exc:
+                print(f"[WARN] RPi pigpio interface init failed ({exc}) – falling back to mock")
 
     from hal.mock_interface import MockInterface
     hw = MockInterface()
@@ -122,10 +127,18 @@ class MainWindow(QMainWindow):
         # Wire navigation
         self._std_mode.register_mode_select_callback(self.show_mode_select)
         self._main_screen.show_mode_select = self.show_mode_select   # type: ignore[attr-defined]
+        # Let the on-screen EXIT button close the window.
+        self._main_screen.request_close = self.close   # type: ignore[attr-defined]
         self._mode_sel_screen.mode_selected.connect(self._on_mode_selected)
         self._thread_screen.exit_requested.connect(self._return_to_main)
         self._profile_screen.exit_requested.connect(self._return_to_main)
         self._radius_screen.exit_requested.connect(self._return_to_main)
+
+        # Keyboard shortcuts (handy on a desktop / with a keyboard attached):
+        #   Ctrl+Q  → quit the application
+        #   F11     → toggle fullscreen (useful when debugging on a monitor)
+        QShortcut(QKeySequence("Ctrl+Q"), self, activated=self.close)
+        QShortcut(QKeySequence("F11"), self, activated=self._toggle_fullscreen)
 
         # Start core services
         self._spindle.start()
@@ -153,6 +166,13 @@ class MainWindow(QMainWindow):
     def _return_to_main(self) -> None:
         self._std_mode.enter()
         self._stack.setCurrentIndex(self.IDX_MAIN)
+
+    def _toggle_fullscreen(self) -> None:
+        if self.isFullScreen():
+            self.showNormal()
+            self.resize(cfg.DISPLAY_WIDTH, cfg.DISPLAY_HEIGHT)
+        else:
+            self.showFullScreen()
 
     def _on_mode_selected(self, mode_id: int) -> None:
         if mode_id == -1 or mode_id == 0:

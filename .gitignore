@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Virtual environment
+lathe_rpi/env/
+env/
+venv/
+.venv/
+
+# Runtime logs
+lathe_rpi/logs/
+logs/
+*.log
+
+# Archives / build artifacts
+*.tar
+*.tar.gz
+*.zip
+
+# OS / editor cruft
+.DS_Store
+*.swp

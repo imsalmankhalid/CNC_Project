@@ -11,8 +11,8 @@ The key algorithm (unchanged from Arduino version):
      compute velocity from buffer size, select step-batch size to fit
      within the available LCD-update window, issue motor steps, and subtract
      from buffer.
-  3. Only one axis moves at a time – the axis not moving has its encoder
-     "frozen" to prevent phantom movement.
+  3. Each axis tracks its own encoder independently via a stored "old" count,
+     so Z and X can be jogged at the same time.
 
 On the RPi this runs inside a high-priority daemon thread; the HAL issues
 actual STEP pulses via pigpio waveforms (hardware-timed).
@@ -23,6 +23,7 @@ from __future__ import annotations
 import os
 import threading
 import time
+import logging
 from typing import TYPE_CHECKING
 
 import config as cfg
@@ -30,6 +31,15 @@ from .state_manager import get_state
 
 if TYPE_CHECKING:
     from hal.hardware_interface import HardwareInterface
+
+
+log = logging.getLogger("core.motion")
+
+
+def _debug_enabled() -> bool:
+    if os.environ.get("LATHE_DEBUG_HAL", "").strip() in ("1", "true", "True"):
+        return True
+    return bool(getattr(cfg, "DEBUG_HAL", False))
 
 
 class MotionController:
@@ -60,6 +70,19 @@ class MotionController:
         # X encoder buffer state
         self._x_enc_old: int = 0
         self._x_enc_buf: float = 0.0
+
+        # Last logged limit-switch snapshot (for change-only debug logging)
+        self._limits_log: tuple | None = None
+
+        self._debug = _debug_enabled()
+        if self._debug:
+            try:
+                from log_setup import setup_logging
+                setup_logging()
+            except Exception:
+                if not logging.getLogger().handlers:
+                    logging.basicConfig(level=logging.DEBUG)
+            log.setLevel(logging.DEBUG)
 
     # ── Public API ────────────────────────────────────────────────────────────
 
@@ -112,8 +135,10 @@ class MotionController:
         if enc_new == self._z_enc_old:
             return
 
-        # Freeze X encoder to prevent phantom X motion while Z moves
-        x_frozen = self._hw.get_x_encoder()
+        if self._debug:
+            log.debug("Z handwheel: enc %d -> %d (delta %+d), buf %.1f",
+                      self._z_enc_old, enc_new, enc_new - self._z_enc_old,
+                      self._z_enc_buf)
 
         self._z_enc_buf += float(enc_new) - float(self._z_enc_old)
 
@@ -147,8 +172,14 @@ class MotionController:
 
             # Check limit switches before moving
             if step_size > 0 and self._state.limit_z_plus:
+                if self._debug:
+                    log.debug("Z+ step BLOCKED by limit_z_plus (buf %.1f)",
+                              self._z_enc_buf)
                 break
             if step_size < 0 and self._state.limit_z_minus:
+                if self._debug:
+                    log.debug("Z- step BLOCKED by limit_z_minus (buf %.1f)",
+                              self._z_enc_buf)
                 break
 
             # Clamp step size so we don't overshoot the Z auto-stop
@@ -169,6 +200,10 @@ class MotionController:
             self._hw.z_step(step_size)
             self._state.mtr_pos_z += step_size
 
+            if self._debug:
+                log.debug("Z step %+d -> mtr_pos_z=%d (vel %.1f)",
+                          step_size, self._state.mtr_pos_z, calc_vel)
+
             # Auto-stop check (catches exact landing)
             if mem_stop < 999_999:
                 if self._state.mtr_pos_z == mem_stop:
@@ -184,8 +219,6 @@ class MotionController:
             enc_new = enc_new2
 
         self._z_enc_old = enc_new
-        # Restore X encoder
-        self._hw.set_x_encoder(x_frozen)
 
     # ── X-axis handwheel ─────────────────────────────────────────────────────
 
@@ -194,7 +227,10 @@ class MotionController:
         if enc_new == self._x_enc_old:
             return
 
-        z_frozen = self._hw.get_z_encoder()
+        if self._debug:
+            log.debug("X handwheel: enc %d -> %d (delta %+d), buf %.1f",
+                      self._x_enc_old, enc_new, enc_new - self._x_enc_old,
+                      self._x_enc_buf)
 
         self._x_enc_buf += float(enc_new) - float(self._x_enc_old)
 
@@ -208,12 +244,22 @@ class MotionController:
             step_size = 1 if self._x_enc_buf > 0 else -1
 
             if step_size > 0 and self._state.limit_x_plus:
+                if self._debug:
+                    log.debug("X+ step BLOCKED by limit_x_plus (buf %.1f)",
+                              self._x_enc_buf)
                 break
             if step_size < 0 and self._state.limit_x_minus:
+                if self._debug:
+                    log.debug("X- step BLOCKED by limit_x_minus (buf %.1f)",
+                              self._x_enc_buf)
                 break
 
             self._hw.x_step(step_size)
             self._state.mtr_pos_x += step_size
+
+            if self._debug:
+                log.debug("X step %+d -> mtr_pos_x=%d",
+                          step_size, self._state.mtr_pos_x)
 
             enc_new2 = self._hw.get_x_encoder()
             self._x_enc_buf = (
@@ -224,17 +270,29 @@ class MotionController:
             enc_new = enc_new2
 
         self._x_enc_old = enc_new
-        self._hw.set_z_encoder(z_frozen)
 
     # ── Limit switch polling ─────────────────────────────────────────────────
 
     def _check_limits(self) -> None:
         st = self._state
+        # Bench-test escape hatch: with no limit switches wired, a floating / NC
+        # limit pin reads as triggered and silently blocks motion.  Disabling
+        # limits forces them all inactive.
+        if not getattr(cfg, "LIMITS_ENABLED", True):
+            st.limit_z_plus = st.limit_z_minus = False
+            st.limit_x_plus = st.limit_x_minus = False
+            return
+
         st.limit_z_plus  = self._hw.read_limit_switch("Z", "+")
         st.limit_z_minus = self._hw.read_limit_switch("Z", "-")
         st.limit_x_plus  = self._hw.read_limit_switch("X", "+")
         st.limit_x_minus = self._hw.read_limit_switch("X", "-")
 
-        if any([st.limit_z_plus, st.limit_z_minus, st.limit_x_plus, st.limit_x_minus]):
-            # A limit is active – upper layers decide which direction to allow
-            pass
+        if self._debug:
+            snapshot = (st.limit_z_plus, st.limit_z_minus,
+                        st.limit_x_plus, st.limit_x_minus)
+            if snapshot != self._limits_log:
+                self._limits_log = snapshot
+                log.debug("limits: Z+=%s Z-=%s X+=%s X-=%s",
+                          st.limit_z_plus, st.limit_z_minus,
+                          st.limit_x_plus, st.limit_x_minus)

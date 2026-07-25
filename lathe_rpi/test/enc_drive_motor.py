@@ -177,9 +177,9 @@ class GearboxAxis:
 def main():
     pot = Potentiometer()
     axes = [
-        GearboxAxis("X", enc_a=5, enc_b=6,
+        GearboxAxis("Z", enc_a=5, enc_b=6,
                     step_pin=17, dir_pin=27, en_pin=22),
-        GearboxAxis("Z", enc_a=13, enc_b=19,
+        GearboxAxis("X", enc_a=13, enc_b=19,
                     step_pin=24, dir_pin=23, en_pin=25),
     ]
 

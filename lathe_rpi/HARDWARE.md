@@ -43,8 +43,8 @@
 
 | Component | Model | Interface | Notes |
 |-----------|-------|-----------|-------|
-| **ADC Module** | Adafruit ADS1115 | I2C (3.3 V) | 16-bit, 4-channel. RPi has no onboard ADC. |
-| **Potentiometer** | Bourns 3547S-1AA-103A (10 kΩ) | Analog | Feed-rate control. Wire wiper to ADS1115 A0. |
+| **ADC Module** | Adafruit ADS1015 (ADS1115 also supported) | I2C (3.3 V) | 4-channel. RPi has no onboard ADC. Set `ADC_BACKEND` in `config.py`. Validated hardware uses ADS1015. |
+| **Potentiometer** | Bourns 3547S-1AA-103A (10 kΩ) | Analog | Feed-rate control. Wire wiper to ADS A0. |
 | **Pot Dial** | Apem MPKES90B14 | — | Calibrated for workshop use. |
 
 ### 1.6 Safety & Inputs
@@ -88,8 +88,8 @@
 | Z STEP | GPIO 17 | Pin 11 | Output | Via level shifter → ClearPath |
 | Z DIR | GPIO 27 | Pin 13 | Output | Via level shifter → ClearPath |
 | Z ENABLE | GPIO 22 | Pin 15 | Output | Via level shifter → ClearPath |
-| X STEP | GPIO 23 | Pin 16 | Output | Via level shifter → ClearPath |
-| X DIR | GPIO 24 | Pin 18 | Output | Via level shifter → ClearPath |
+| X STEP | GPIO 24 | Pin 18 | Output | Via level shifter → ClearPath |
+| X DIR | GPIO 23 | Pin 16 | Output | Via level shifter → ClearPath |
 | X ENABLE | GPIO 25 | Pin 22 | Output | Via level shifter → ClearPath |
 | Button 1 | GPIO 26 | Pin 37 | Input | Active LOW, internal pull-up |
 | Button 2 | GPIO 20 | Pin 38 | Input | Active LOW, internal pull-up |
@@ -122,8 +122,8 @@
   └─────────────┘       │  GPIO 27 → Z DIR  ─────────┼──→ Shifter → ClearPath Z
                         │  GPIO 22 → Z ENABLE ───────┼──→  5V    → ClearPath Z
   ┌─────────────┐       │                             │
-  │ AutoTech C3 │──────→│  GPIO 12                   │  GPIO 23 → X STEP ─────┼──→ Level ──→ ClearPath X
-  └─────────────┘       │  GPIO 24 → X DIR  ─────────┼──→ Shifter → ClearPath X
+  │ AutoTech C3 │──────→│  GPIO 12                   │  GPIO 24 → X STEP ─────┼──→ Level ──→ ClearPath X
+  └─────────────┘       │  GPIO 23 → X DIR  ─────────┼──→ Shifter → ClearPath X
                         │  GPIO 25 → X ENABLE ───────┼──→  5V    → ClearPath X
   ┌─────────────┐       │                             │
   │ ADS1115 ADC │──I2C──│  GPIO 2/3 (SDA/SCL)        │

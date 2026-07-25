@@ -150,18 +150,23 @@ class RpiInterface(HardwareInterface):
         self._pi.write(cfg.GPIO_X_ENABLE, 1)
 
     def _init_adc(self) -> None:
-        if cfg.ADC_BACKEND == "ads1115":
+        backend = getattr(cfg, "ADC_BACKEND", "ads1015")
+        if backend in ("ads1015", "ads1115"):
             try:
                 import board          # type: ignore
                 import busio          # type: ignore
-                import adafruit_ads1x15.ads1115 as ADS  # type: ignore
                 from adafruit_ads1x15.analog_in import AnalogIn  # type: ignore
                 from adafruit_ads1x15.ads1x15 import Pin  # type: ignore
                 i2c = busio.I2C(board.SCL, board.SDA)
-                self._ads = ADS.ADS1115(i2c)
+                if backend == "ads1015":
+                    import adafruit_ads1x15.ads1015 as ADS  # type: ignore
+                    self._ads = ADS.ADS1015(i2c)
+                else:
+                    import adafruit_ads1x15.ads1115 as ADS  # type: ignore
+                    self._ads = ADS.ADS1115(i2c)
                 self._ads_chan = AnalogIn(self._ads, getattr(Pin, f"A{cfg.ADC_POT_CHANNEL}"))
             except Exception as exc:
-                print(f"[WARN] ADS1115 init failed: {exc} – pot reads will return midpoint")
+                print(f"[WARN] {backend} init failed: {exc} – pot reads will return midpoint")
 
     def shutdown(self) -> None:
         if self._pi:
@@ -234,9 +239,9 @@ class RpiInterface(HardwareInterface):
 
     def read_potentiometer(self) -> int:
         if self._ads_chan is not None:
-            # ADS1115 returns 0–26400 mV (gain=1); map to 0–1023
-            raw_mv = self._ads_chan.voltage * 1000.0
-            scaled = int(raw_mv / 3300.0 * 1024)
+            # Map the pot voltage to the 0–1023 range calcFeed() expects.
+            ref = getattr(cfg, "POT_REF_VOLTAGE", 3.3)
+            scaled = int(self._ads_chan.voltage / ref * 1024)
             return max(0, min(1023, scaled))
         return 512  # fallback midpoint
 

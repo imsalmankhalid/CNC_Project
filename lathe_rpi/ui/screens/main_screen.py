@@ -20,7 +20,7 @@ from typing import TYPE_CHECKING
 
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtWidgets import (
-    QFrame, QGridLayout, QHBoxLayout, QLabel,
+    QFrame, QGridLayout, QHBoxLayout, QLabel, QMessageBox,
     QPushButton, QSizePolicy, QVBoxLayout, QWidget,
 )
 
@@ -205,7 +205,10 @@ class MainScreen(QWidget):
     def _build_button_bar(self) -> QFrame:
         bar = QFrame()
         bar.setObjectName("mode_bar")
-        bar.setFixedHeight(72)
+        # Height must clear the tallest button (E-STOP, 64px min) plus the 6px
+        # top/bottom margins, otherwise the button overflows the bar and
+        # overlaps the DRO area in fullscreen.
+        bar.setFixedHeight(88)
         layout = QHBoxLayout(bar)
         layout.setContentsMargins(6, 6, 6, 6)
         layout.setSpacing(5)
@@ -223,6 +226,7 @@ class MainScreen(QWidget):
         self._btn_set_stop = btn("SET STOP")
         self._btn_clr_stop = btn("CLR STOP")
         self._btn_modes    = btn("MODES ▶")
+        self._btn_exit     = btn("✕ EXIT")
         self._btn_estop    = btn("⬛ E-STOP", "danger_btn")
 
         self._btn_mem_x.clicked.connect(self._on_mem_cycle_x)
@@ -233,17 +237,22 @@ class MainScreen(QWidget):
         self._btn_set_stop.clicked.connect(self._on_set_stop)
         self._btn_clr_stop.clicked.connect(self._on_clr_stop)
         self._btn_modes.clicked.connect(self._on_modes)
+        self._btn_exit.clicked.connect(self._on_exit)
         self._btn_estop.clicked.connect(self._on_estop)
 
         for b in (self._btn_mem_x, self._btn_zero_x,
                   self._btn_mem_z, self._btn_zero_z,
                   self._btn_unit, self._btn_set_stop,
                   self._btn_clr_stop, self._btn_modes):
-            layout.addWidget(b, stretch=1)
+            layout.addWidget(b, stretch=2)
 
-        layout.addStretch()
-        self._btn_estop.setMinimumWidth(100)
-        layout.addWidget(self._btn_estop)
+        # Compact EXIT button (quit the app – useful on a fullscreen panel).
+        self._btn_exit.setFixedWidth(70)
+        layout.addWidget(self._btn_exit, stretch=0)
+
+        layout.addSpacing(6)
+        self._btn_estop.setMinimumWidth(130)
+        layout.addWidget(self._btn_estop, stretch=0)
 
         return bar
 
@@ -281,6 +290,20 @@ class MainScreen(QWidget):
         show_fn = getattr(self, 'show_mode_select', None)
         if callable(show_fn):
             show_fn()
+
+    def _on_exit(self) -> None:
+        """Confirm, then quit the application (injected request_close callback)."""
+        reply = QMessageBox.question(
+            self,
+            "Exit MbW Lathe",
+            "Close the lathe control application?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
+        )
+        if reply == QMessageBox.Yes:
+            close_fn = getattr(self, 'request_close', None)
+            if callable(close_fn):
+                close_fn()
 
     def _on_estop(self) -> None:
         st = self._state

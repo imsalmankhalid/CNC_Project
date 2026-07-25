@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=MbW Lathe
+GenericName=CNC Lathe Control
+Comment=Start the MbW Lathe control system
+# Absolute path so the icon works from the Desktop and the applications menu.
+Exec=/home/cnc/CNC_Project/lathe_rpi/run_lathe.sh
+Path=/home/cnc/CNC_Project/lathe_rpi
+Icon=applications-engineering
+Terminal=false
+Categories=Utility;Engineering;
+StartupNotify=true

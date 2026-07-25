@@ -16,6 +16,10 @@ if "--windowed" in sys.argv:
     _cfg.FULLSCREEN = False
     sys.argv.remove("--windowed")
 
+# Configure logging (console + rotating file) before anything else runs.
+from log_setup import setup_logging
+setup_logging()
+
 from ui.app import run_app
 
 if __name__ == "__main__":
