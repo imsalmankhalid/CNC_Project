@@ -51,6 +51,11 @@ class MachineState:
     limit_x_plus:  bool = False
     limit_x_minus: bool = False
 
+    # Per-axis "limit hit" (either direction).  A single switch per axis feeds
+    # these; motion on that axis is blocked while True and the UI alarms.
+    limit_z: bool = False
+    limit_x: bool = False
+
     # ── Emergency stop ────────────────────────────────────────────────────
     estop: bool = False
 

@@ -91,17 +91,28 @@ GPIO_BTN_3    = 21
 # Half-nut lever switch (active HIGH when engaged)
 GPIO_HALFNUT  = 4
 
-# Limit switches (active LOW = triggered, NO wiring)
-GPIO_LIM_Z_PLUS  = 16
-GPIO_LIM_Z_MINUS = 7
-GPIO_LIM_X_PLUS  = 8
-GPIO_LIM_X_MINUS = 11
+# Limit switches (active LOW = triggered, NO switch wired to GND, pull-up).
+#
+# Hardware fitted: ONE limit switch per axis.
+#   * Z-axis limit  →  GPIO 16   (GPIO_LIM_Z_PLUS)
+#   * X-axis limit  →  GPIO 8    (GPIO_LIM_X_PLUS)
+# The MINUS pins below are reserved for a future second switch per axis and can
+# be left unwired (they read "not triggered" thanks to the internal pull-up).
+# A single switch on GPIO 16 / GPIO 8 therefore raises the whole-axis limit.
+GPIO_LIM_Z_PLUS  = 16   # Z-axis limit switch
+GPIO_LIM_Z_MINUS = 7    # reserved (unwired)
+GPIO_LIM_X_PLUS  = 8    # X-axis limit switch
+GPIO_LIM_X_MINUS = 11   # reserved (unwired)
 
 # Master enable for limit switches.  Set to False for bench testing when no
 # limit switches are wired – otherwise a floating / NC / triggered limit pin
-# will silently block motion in that direction (e.g. a stuck Z+ limit blocks
-# all positive Z jog).  When False, all limit reads return "not triggered".
+# will silently block motion (e.g. a stuck Z limit blocks all Z jog).
+# When False, all limit reads return "not triggered".
 LIMITS_ENABLED   = True
+
+# Audible alert when a limit switch is hit (best-effort; needs a working audio
+# output on the Pi).  The on-screen red flashing warning always shows.
+LIMIT_SOUND      = True
 
 # ADC (MCP3208 via SPI  –  or ADS1015/ADS1115 via I2C)
 # The validated hardware (test/enc_drive_motor.py) uses an ADS1015 on A0.

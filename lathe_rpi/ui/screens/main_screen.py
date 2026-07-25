@@ -20,7 +20,7 @@ from typing import TYPE_CHECKING
 
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtWidgets import (
-    QFrame, QGridLayout, QHBoxLayout, QLabel, QMessageBox,
+    QApplication, QFrame, QGridLayout, QHBoxLayout, QLabel, QMessageBox,
     QPushButton, QSizePolicy, QVBoxLayout, QWidget,
 )
 
@@ -52,6 +52,11 @@ class MainScreen(QWidget):
         self._std = standard_mode
         self._state = get_state()
 
+        # Limit-alarm state
+        self._alarm_phase = 0            # flash phase counter
+        self._prev_limit_z = False       # rising-edge detection for sound
+        self._prev_limit_x = False
+
         self._build_ui()
 
         # Refresh DRO at 20 Hz
@@ -78,6 +83,27 @@ class MainScreen(QWidget):
 
         # ── Bottom button bar ────────────────────────────────────────────────
         root.addWidget(self._build_button_bar(), stretch=0)
+
+        # ── Limit-hit warning banner (floating overlay, hidden by default) ───
+        self._alarm_banner = QLabel("", self)
+        self._alarm_banner.setObjectName("alarm_banner_on")
+        self._alarm_banner.setAlignment(Qt.AlignCenter)
+        self._alarm_banner.hide()
+
+    def _position_alarm_banner(self) -> None:
+        """Centre the warning banner near the top of the screen."""
+        if not hasattr(self, "_alarm_banner"):
+            return
+        w = int(self.width() * 0.6)
+        h = 60
+        x = (self.width() - w) // 2
+        y = 12
+        self._alarm_banner.setGeometry(x, y, w, h)
+        self._alarm_banner.raise_()
+
+    def resizeEvent(self, event) -> None:  # noqa: N802 (Qt naming)
+        super().resizeEvent(event)
+        self._position_alarm_banner()
 
     def _make_card(self) -> QFrame:
         f = QFrame()
@@ -368,6 +394,68 @@ class MainScreen(QWidget):
         self._update_limit(self._lim_zm, st.limit_z_minus, "Z-")
         self._update_limit(self._lim_xp, st.limit_x_plus,  "X+")
         self._update_limit(self._lim_xm, st.limit_x_minus, "X-")
+
+        # Limit-hit alarm: red DRO box(es), flashing banner, and a beep.
+        self._update_limit_alarm(st.limit_z, st.limit_x)
+
+    # ── Limit-hit alarm ───────────────────────────────────────────────────────
+
+    def _update_limit_alarm(self, limit_z: bool, limit_x: bool) -> None:
+        # Colour the affected axis value box red.
+        self._set_axis_alarm(self._z_val, limit_z)
+        self._set_axis_alarm(self._x_val, limit_x)
+
+        # Audible alert on the rising edge of either limit.
+        if (limit_z and not self._prev_limit_z) or (limit_x and not self._prev_limit_x):
+            self._play_alarm_sound()
+        self._prev_limit_z = limit_z
+        self._prev_limit_x = limit_x
+
+        if not (limit_z or limit_x):
+            if self._alarm_banner.isVisible():
+                self._alarm_banner.hide()
+            return
+
+        # Compose the warning text.
+        if limit_z and limit_x:
+            msg = "\u26a0  Z & X LIMIT HIT  \u26a0"
+        elif limit_z:
+            msg = "\u26a0  Z-AXIS LIMIT HIT  \u26a0"
+        else:
+            msg = "\u26a0  X-AXIS LIMIT HIT  \u26a0"
+        self._alarm_banner.setText(msg)
+
+        # Flash: toggle style ~2.5 Hz (every 4 refresh ticks at 20 Hz).
+        self._alarm_phase = (self._alarm_phase + 1) % 8
+        on = self._alarm_phase < 4
+        self._alarm_banner.setObjectName("alarm_banner_on" if on else "alarm_banner_off")
+        self._alarm_banner.style().unpolish(self._alarm_banner)
+        self._alarm_banner.style().polish(self._alarm_banner)
+        if not self._alarm_banner.isVisible():
+            self._position_alarm_banner()
+            self._alarm_banner.show()
+        self._alarm_banner.raise_()
+
+    @staticmethod
+    def _set_axis_alarm(lbl: QLabel, triggered: bool) -> None:
+        want = "dro_value_alarm" if triggered else "dro_value"
+        if lbl.objectName() != want:
+            lbl.setObjectName(want)
+            lbl.style().unpolish(lbl)
+            lbl.style().polish(lbl)
+
+    def _play_alarm_sound(self) -> None:
+        """Best-effort audible alert (depends on system audio being available)."""
+        try:
+            import config as cfg
+            if not getattr(cfg, "LIMIT_SOUND", True):
+                return
+        except Exception:
+            pass
+        try:
+            QApplication.beep()
+        except Exception:
+            pass
 
     @staticmethod
     def _update_limit(lbl: QLabel, triggered: bool, name: str) -> None:

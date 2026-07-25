@@ -141,6 +141,16 @@ class MotionController:
         if enc_new == self._z_enc_old:
             return
 
+        # Whole-axis limit switch (GPIO 16): while hit, the Z motor must not
+        # move.  Track the encoder but emit no steps and keep the buffer empty,
+        # so jogging resumes cleanly once the switch releases.
+        if self._state.limit_z:
+            if self._debug:
+                log.debug("Z motion BLOCKED – limit_z active (enc=%d)", enc_new)
+            self._z_enc_old = enc_new
+            self._z_enc_buf = 0.0
+            return
+
         if self._debug:
             log.debug("Z handwheel: enc %d -> %d (delta %+d), buf %.1f",
                       self._z_enc_old, enc_new, enc_new - self._z_enc_old,
@@ -149,10 +159,10 @@ class MotionController:
         self._z_enc_buf += float(enc_new) - float(self._z_enc_old)
 
         # ------------------------------------------------------------------
-        # TEMPORARY (bench testing): Z now uses the SAME simple ±1-per-count
-        # stepping as the X axis, with NO limit-switch checks, so both axes
-        # jog smoothly together.  The richer Arduino-style Z behaviour is
-        # preserved below and should be restored for production use:
+        # TEMPORARY (bench testing): Z uses the SAME simple ±1-per-count
+        # stepping as the X axis so both axes jog smoothly together.  A simple
+        # whole-axis limit block (above) IS active, but the richer Arduino-style
+        # Z behaviour is preserved below and should be restored for production:
         #
         #   1. Velocity banding — pick a step BATCH size from the handwheel
         #      speed (calc_vel) so a fast spin emits many steps per cycle
@@ -215,6 +225,15 @@ class MotionController:
         if enc_new == self._x_enc_old:
             return
 
+        # Whole-axis limit switch (GPIO 8): while hit, the X motor must not
+        # move.  Track the encoder but emit no steps and keep the buffer empty.
+        if self._state.limit_x:
+            if self._debug:
+                log.debug("X motion BLOCKED – limit_x active (enc=%d)", enc_new)
+            self._x_enc_old = enc_new
+            self._x_enc_buf = 0.0
+            return
+
         if self._debug:
             log.debug("X handwheel: enc %d -> %d (delta %+d), buf %.1f",
                       self._x_enc_old, enc_new, enc_new - self._x_enc_old,
@@ -269,6 +288,7 @@ class MotionController:
         if not getattr(cfg, "LIMITS_ENABLED", True):
             st.limit_z_plus = st.limit_z_minus = False
             st.limit_x_plus = st.limit_x_minus = False
+            st.limit_z = st.limit_x = False
             return
 
         st.limit_z_plus  = self._hw.read_limit_switch("Z", "+")
@@ -276,11 +296,13 @@ class MotionController:
         st.limit_x_plus  = self._hw.read_limit_switch("X", "+")
         st.limit_x_minus = self._hw.read_limit_switch("X", "-")
 
+        # Whole-axis limit: a single switch per axis (Z→GPIO16, X→GPIO8) trips
+        # either direction.  Motion on that axis is blocked while True.
+        st.limit_z = st.limit_z_plus or st.limit_z_minus
+        st.limit_x = st.limit_x_plus or st.limit_x_minus
+
         if self._debug:
-            snapshot = (st.limit_z_plus, st.limit_z_minus,
-                        st.limit_x_plus, st.limit_x_minus)
+            snapshot = (st.limit_z, st.limit_x)
             if snapshot != self._limits_log:
                 self._limits_log = snapshot
-                log.debug("limits: Z+=%s Z-=%s X+=%s X-=%s",
-                          st.limit_z_plus, st.limit_z_minus,
-                          st.limit_x_plus, st.limit_x_minus)
+                log.debug("limits: Z=%s X=%s", st.limit_z, st.limit_x)

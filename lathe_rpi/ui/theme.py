@@ -56,6 +56,18 @@ QLabel#dro_value_dimmed {{
     font-family: "JetBrains Mono", Consolas, Monospace;
 }}
 
+/* DRO value when its axis limit switch is hit */
+QLabel#dro_value_alarm {{
+    color: {CLR_RED};
+    font-size: 48px;
+    font-weight: bold;
+    font-family: "JetBrains Mono", Consolas, Monospace;
+    letter-spacing: 2px;
+    background-color: #3a0010;
+    border: 2px solid {CLR_RED};
+    border-radius: 6px;
+}}
+
 QLabel#dro_axis_label {{
     color: {CLR_TEXT_DIM};
     font-size: 20px;
@@ -183,6 +195,27 @@ QLabel#limit_triggered {{
     color: {CLR_RED};
     font-size: 12px;
     font-weight: bold;
+}}
+
+/* ── Flashing limit-hit warning banner (overlay) ─── */
+QLabel#alarm_banner_on {{
+    color: white;
+    background-color: {CLR_RED};
+    border: 3px solid white;
+    border-radius: 10px;
+    font-size: 26px;
+    font-weight: bold;
+    padding: 8px 18px;
+}}
+
+QLabel#alarm_banner_off {{
+    color: {CLR_RED};
+    background-color: #2a0008;
+    border: 3px solid {CLR_RED};
+    border-radius: 10px;
+    font-size: 26px;
+    font-weight: bold;
+    padding: 8px 18px;
 }}
 
 /* ── Wizard screen prompt text ─── */
