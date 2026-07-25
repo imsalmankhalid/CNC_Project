@@ -14,6 +14,12 @@ The key algorithm (unchanged from Arduino version):
   3. Each axis tracks its own encoder independently via a stored "old" count,
      so Z and X can be jogged at the same time.
 
+NOTE (bench testing): Z is temporarily simplified to the same plain
+±1-per-count stepping as X, with limit switches omitted, so both axes jog
+smoothly together.  The original Z velocity-banding / limit / auto-stop logic
+is preserved in a comment block inside _process_z_handwheel() and should be
+restored for production.
+
 On the RPi this runs inside a high-priority daemon thread; the HAL issues
 actual STEP pulses via pigpio waveforms (hardware-timed).
 """
@@ -142,72 +148,54 @@ class MotionController:
 
         self._z_enc_buf += float(enc_new) - float(self._z_enc_old)
 
+        # ------------------------------------------------------------------
+        # TEMPORARY (bench testing): Z now uses the SAME simple ±1-per-count
+        # stepping as the X axis, with NO limit-switch checks, so both axes
+        # jog smoothly together.  The richer Arduino-style Z behaviour is
+        # preserved below and should be restored for production use:
+        #
+        #   1. Velocity banding — pick a step BATCH size from the handwheel
+        #      speed (calc_vel) so a fast spin emits many steps per cycle
+        #      (fast rapid jog), while a slow spin emits single steps:
+        #
+        #        calc_vel = (abs(self._z_enc_buf) * cfg.Z_MAX_VEL) / cfg.Z_MAX_ENC_BUF
+        #        delay_1stp = (cfg.Z_PITCH / (calc_vel * cfg.Z_MTR_CNT_PER_REV)) \
+        #                     * 60.0 * 1_000_000.0
+        #        delay_1stp = min(delay_1stp, 24000)
+        #        if   calc_vel <= cfg.Z_VEL_LIMIT_A: step_size = max(1, round(8750 / delay_1stp + 0.5))
+        #        elif calc_vel <= cfg.Z_VEL_LIMIT_B: step_size = max(1, round(4800 / delay_1stp + 0.5))
+        #        elif calc_vel <= cfg.Z_VEL_LIMIT_C: step_size = max(1, round(4800 / delay_1stp + 0.5))
+        #        elif calc_vel <= cfg.Z_VEL_LIMIT_D: step_size = max(1, round(3900 / delay_1stp + 0.5))
+        #        else:                               step_size = max(1, round(700  / delay_1stp + 0.5))
+        #        if self._z_enc_buf < 0: step_size = -step_size
+        #
+        #   2. Limit switches — stop before driving into an end stop:
+        #        if step_size > 0 and self._state.limit_z_plus:  break
+        #        if step_size < 0 and self._state.limit_z_minus: break
+        #
+        #   3. Z auto-stop (mem_stop_z) — clamp step_size so the axis lands
+        #      exactly on the stored Z-stop position and does not overshoot.
+        #
+        # To re-enable, replace the simple loop below with the logic above
+        # (also see git history for the full original implementation).
+        # ------------------------------------------------------------------
+
         while abs(self._z_enc_buf) >= cfg.Z_COUNT_ADJ_INV:
-            # Clamp buffer to max (protects against spinning past max velocity)
+            # Clamp buffer to protect against runaway when spun very fast
             if abs(self._z_enc_buf) > cfg.Z_MAX_ENC_BUF:
                 self._z_enc_buf = (
                     cfg.Z_MAX_ENC_BUF if self._z_enc_buf > 0 else -cfg.Z_MAX_ENC_BUF
                 )
 
-            calc_vel = (abs(self._z_enc_buf) * cfg.Z_MAX_VEL) / cfg.Z_MAX_ENC_BUF
-            delay_1stp = (
-                (cfg.Z_PITCH / (calc_vel * cfg.Z_MTR_CNT_PER_REV)) * 60.0 * 1_000_000.0
-            )
-            delay_1stp = min(delay_1stp, 24000)
+            # Simple proportional step, identical to the X axis
+            step_size = 1 if self._z_enc_buf > 0 else -1
 
-            # Choose step batch size based on velocity band (matching Arduino)
-            if calc_vel <= cfg.Z_VEL_LIMIT_A:
-                step_size = max(1, round(8750 / delay_1stp + 0.5))
-            elif calc_vel <= cfg.Z_VEL_LIMIT_B:
-                step_size = max(1, round(4800 / delay_1stp + 0.5))
-            elif calc_vel <= cfg.Z_VEL_LIMIT_C:
-                step_size = max(1, round(4800 / delay_1stp + 0.5))
-            elif calc_vel <= cfg.Z_VEL_LIMIT_D:
-                step_size = max(1, round(3900 / delay_1stp + 0.5))
-            else:
-                step_size = max(1, round(700 / delay_1stp + 0.5))
-
-            if self._z_enc_buf < 0:
-                step_size = -step_size
-
-            # Check limit switches before moving
-            if step_size > 0 and self._state.limit_z_plus:
-                if self._debug:
-                    log.debug("Z+ step BLOCKED by limit_z_plus (buf %.1f)",
-                              self._z_enc_buf)
-                break
-            if step_size < 0 and self._state.limit_z_minus:
-                if self._debug:
-                    log.debug("Z- step BLOCKED by limit_z_minus (buf %.1f)",
-                              self._z_enc_buf)
-                break
-
-            # Clamp step size so we don't overshoot the Z auto-stop
-            mem_stop = self._state.mem_stop_z[self._state.active_mem_z]
-            if mem_stop < 999_999:
-                if step_size > 0:
-                    remaining = mem_stop - self._state.mtr_pos_z
-                    if remaining <= 0:
-                        break
-                    step_size = min(step_size, remaining)
-                elif step_size < 0:
-                    remaining = mem_stop - self._state.mtr_pos_z
-                    if remaining >= 0:
-                        break
-                    step_size = max(step_size, remaining)
-
-            # Issue motor steps
             self._hw.z_step(step_size)
             self._state.mtr_pos_z += step_size
 
             if self._debug:
-                log.debug("Z step %+d -> mtr_pos_z=%d (vel %.1f)",
-                          step_size, self._state.mtr_pos_z, calc_vel)
-
-            # Auto-stop check (catches exact landing)
-            if mem_stop < 999_999:
-                if self._state.mtr_pos_z == mem_stop:
-                    break
+                log.debug("Z step %+d -> mtr_pos_z=%d",
+                          step_size, self._state.mtr_pos_z)
 
             # Update buffer
             enc_new2 = self._hw.get_z_encoder()
