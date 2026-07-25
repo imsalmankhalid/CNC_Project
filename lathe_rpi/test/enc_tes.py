@@ -2,43 +2,56 @@ import time
 from gpiozero import RotaryEncoder
 
 
-
 # Define the pins using the BCM GPIO numbers (not the physical pin numbers)
-# Physical Pin 29 = GPIO 5
-# Physical Pin 31 = GPIO 6
-PIN_A = 5
-PIN_B = 6
+# Encoder 1: GPIO 13 / 19
+# Encoder 2: GPIO 5  / 6
+PIN_A1 = 13
+PIN_B1 = 19
+PIN_A2 = 5
+PIN_B2 = 6
 
-print("Initializing AMT103-V Encoder...")
-print(f"Tracking Pin A (GPIO {PIN_A}) and Pin B (GPIO {PIN_B})")
+print("Initializing AMT103-V Encoders...")
+print(f"Encoder1 -> A: GPIO {PIN_A1}, B: GPIO {PIN_B1}")
+print(f"Encoder2 -> A: GPIO {PIN_A2}, B: GPIO {PIN_B2}")
 
-# Initialize the encoder
-# max_steps=0 removes bounds so it can rotate infinitely positive or negative
-encoder = RotaryEncoder(PIN_A, PIN_B, max_steps=0)
+# Initialize both encoders (max_steps=0 for unbounded rotation)
+enc1 = RotaryEncoder(PIN_A1, PIN_B1, max_steps=0)
+enc2 = RotaryEncoder(PIN_A2, PIN_B2, max_steps=0)
 
-print("Encoder ready! Spin the shaft... (Press Ctrl+C to exit)\n")
+print("Encoders ready! Spin the shafts... (Press Ctrl+C to exit)\n")
 
-# Keep track of the last known position to prevent terminal spam
-last_steps = None
+# Keep track of last positions to avoid spamming the terminal
+last1 = None
+last2 = None
 
 try:
     while True:
-        # Read the current step position
-        current_steps = encoder.steps
-        
-        # Only print when the encoder is turned
-        if current_steps != last_steps:
-            # Determine spinning direction
-            if last_steps is not None:
-                direction = "Clockwise ↻" if current_steps > last_steps else "Counter-Clockwise ↺"
+        v1 = enc1.steps
+        v2 = enc2.steps
+
+        lines = []
+
+        if v1 != last1:
+            if last1 is not None:
+                d1 = "CW ↻" if v1 > last1 else "CCW ↺"
             else:
-                direction = "Initialized"
-                
-            print(f"Position Count: {current_steps:<5} | Direction: {direction}")
-            last_steps = current_steps
-            
-        time.sleep(0.01)  # Keeps CPU usage low
+                d1 = "Initialized"
+            lines.append(f"Enc1: {v1:<6} | {d1}")
+            last1 = v1
+
+        if v2 != last2:
+            if last2 is not None:
+                d2 = "CW ↻" if v2 > last2 else "CCW ↺"
+            else:
+                d2 = "Initialized"
+            lines.append(f"Enc2: {v2:<6} | {d2}")
+            last2 = v2
+
+        if lines:
+            print("  ".join(lines))
+
+        time.sleep(0.01)
 
 except KeyboardInterrupt:
-    print("\nTesting stopped by user.")
+    print("\nEncoder testing stopped by user.")
 
