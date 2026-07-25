@@ -408,6 +408,9 @@ class MainScreen(QWidget):
         # Audible alert on the rising edge of either limit.
         if (limit_z and not self._prev_limit_z) or (limit_x and not self._prev_limit_x):
             self._play_alarm_sound()
+        elif limit_z or limit_x:
+            # Keep re-arming the alarm while a limit stays hit.
+            self._maybe_repeat_alarm_sound()
         self._prev_limit_z = limit_z
         self._prev_limit_x = limit_x
 
@@ -445,17 +448,75 @@ class MainScreen(QWidget):
             lbl.style().polish(lbl)
 
     def _play_alarm_sound(self) -> None:
-        """Best-effort audible alert (depends on system audio being available)."""
+        """Play the limit alarm WAV (best-effort; falls back to a system beep)."""
+        import time
+        self._last_alarm_sound = time.monotonic()
         try:
             import config as cfg
             if not getattr(cfg, "LIMIT_SOUND", True):
                 return
         except Exception:
-            pass
+            cfg = None
+
+        wav = self._resolve_alarm_wav(cfg)
+        if wav and self._spawn_wav_player(wav):
+            return
+        # Last-resort fallback.
         try:
             QApplication.beep()
         except Exception:
             pass
+
+    def _maybe_repeat_alarm_sound(self) -> None:
+        """Replay the alarm periodically while a limit remains hit."""
+        import time
+        try:
+            import config as cfg
+            if not getattr(cfg, "LIMIT_SOUND", True):
+                return
+            period = float(getattr(cfg, "LIMIT_SOUND_REPEAT_S", 0) or 0)
+        except Exception:
+            return
+        if period <= 0:
+            return
+        last = getattr(self, "_last_alarm_sound", 0.0)
+        if time.monotonic() - last >= period:
+            self._play_alarm_sound()
+
+    @staticmethod
+    def _resolve_alarm_wav(cfg) -> str | None:
+        import os
+        rel = getattr(cfg, "LIMIT_SOUND_FILE", "assets/sounds/limit_alarm.wav") if cfg else \
+            "assets/sounds/limit_alarm.wav"
+        if os.path.isabs(rel):
+            return rel if os.path.isfile(rel) else None
+        # Project dir = two levels up from this file (ui/screens/ -> lathe_rpi/).
+        base = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        path = os.path.join(base, rel)
+        return path if os.path.isfile(path) else None
+
+    @staticmethod
+    def _spawn_wav_player(wav: str) -> bool:
+        """Start a non-blocking WAV playback via aplay or ffplay. Returns True on success."""
+        import shutil
+        import subprocess
+        players = (
+            ["aplay", "-q", wav],
+            ["ffplay", "-nodisp", "-autoexit", "-loglevel", "quiet", wav],
+            ["paplay", wav],
+        )
+        for cmd in players:
+            if shutil.which(cmd[0]):
+                try:
+                    subprocess.Popen(
+                        cmd,
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL,
+                    )
+                    return True
+                except Exception:
+                    continue
+        return False
 
     @staticmethod
     def _update_limit(lbl: QLabel, triggered: bool, name: str) -> None:

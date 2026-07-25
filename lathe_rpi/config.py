@@ -113,6 +113,11 @@ LIMITS_ENABLED   = True
 # Audible alert when a limit switch is hit (best-effort; needs a working audio
 # output on the Pi).  The on-screen red flashing warning always shows.
 LIMIT_SOUND      = True
+# WAV file played on a limit hit (relative to the project dir, or absolute).
+# Regenerate with: python assets/sounds/generate_alarm.py
+LIMIT_SOUND_FILE = "assets/sounds/limit_alarm.wav"
+# While a limit stays hit, replay the alarm this often (seconds); 0 = play once.
+LIMIT_SOUND_REPEAT_S = 2.0
 
 # ADC (MCP3208 via SPI  –  or ADS1015/ADS1115 via I2C)
 # The validated hardware (test/enc_drive_motor.py) uses an ADS1015 on A0.
