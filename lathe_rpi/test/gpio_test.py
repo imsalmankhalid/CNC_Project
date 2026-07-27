@@ -1,7 +1,7 @@
 from gpiozero import DigitalOutputDevice
 
-gpio = DigitalOutputDevice(23)
-gpio2 = DigitalOutputDevice(24)
+gpio = DigitalOutputDevice(16)
+gpio2 = DigitalOutputDevice(8)
 gpio3 = DigitalOutputDevice(25)
 
 while True:

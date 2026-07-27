@@ -110,6 +110,13 @@ GPIO_LIM_X_MINUS = 11   # reserved (unwired)
 # When False, all limit reads return "not triggered".
 LIMITS_ENABLED   = True
 
+# Limit switch contact type:
+#   True  = Normally-Closed (NC) – closed (to GND) at rest, OPENS when hit.
+#           This is fail-safe: a broken wire reads as "limit hit".
+#   False = Normally-Open (NO)  – open at rest, CLOSES (to GND) when hit.
+# The fitted switches on this machine are NC.
+LIMIT_NORMALLY_CLOSED = True
+
 # Audible alert when a limit switch is hit (best-effort; needs a working audio
 # output on the Pi).  The on-screen red flashing warning always shows.
 LIMIT_SOUND      = True

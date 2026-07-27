@@ -140,7 +140,9 @@ class Rpi5Interface(HardwareInterface):
         # Half-nut switch (active-HIGH, pull-down)
         self._halfnut_btn = Button(cfg.GPIO_HALFNUT, pull_up=False)
 
-        # Limit switches (active-LOW, internal pull-up)
+        # Limit switches (normally-closed, active-HIGH when triggered, internal pull-up)
+        # NC wiring: switch closed (not triggered) → pin LOW → is_pressed=True
+        #            switch opens (triggered)     → pin HIGH → is_pressed=False
         self._limits[("Z", "+")] = Button(cfg.GPIO_LIM_Z_PLUS, pull_up=True)
         self._limits[("Z", "-")] = Button(cfg.GPIO_LIM_Z_MINUS, pull_up=True)
         self._limits[("X", "+")] = Button(cfg.GPIO_LIM_X_PLUS, pull_up=True)
@@ -362,8 +364,10 @@ class Rpi5Interface(HardwareInterface):
     def read_limit_switch(self, axis: str, direction: str) -> bool:
         btn = self._limits.get((axis, direction))
         if btn:
-            # Active-LOW when triggered, so is_pressed means triggered because of pull_up=True
-            return btn.is_pressed
+            # Normally-closed switch: triggered when circuit opens (pin goes HIGH)
+            # is_pressed=True means pin is LOW (normal, not triggered)
+            # is_pressed=False means pin is HIGH (triggered)
+            return not btn.is_pressed
         return False
 
     # ── Timing helpers ───────────────────────────────────────────────────────

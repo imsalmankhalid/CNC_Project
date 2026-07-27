@@ -270,7 +270,7 @@ class RpiInterface(HardwareInterface):
     def read_limit_switch(self, axis: str, direction: str) -> bool:
         pin = self._LIMIT_PINS.get((axis, direction))
         if pin and self._pi:
-            return self._pi.read(pin) == 0  # active-LOW = triggered
+            return self._pi.read(pin) == 1  # active-LOW = triggered
         return False
 
     # ── Timing helpers ───────────────────────────────────────────────────────

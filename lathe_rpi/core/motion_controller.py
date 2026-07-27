@@ -298,8 +298,8 @@ class MotionController:
 
         # Whole-axis limit: a single switch per axis (Z→GPIO16, X→GPIO8) trips
         # either direction.  Motion on that axis is blocked while True.
-        st.limit_z = st.limit_z_plus or st.limit_z_minus
-        st.limit_x = st.limit_x_plus or st.limit_x_minus
+        st.limit_z = st.limit_z_plus
+        st.limit_x = st.limit_x_plus 
 
         if self._debug:
             snapshot = (st.limit_z, st.limit_x)
