@@ -1,0 +1,52 @@
+** Drc report for hat.kicad_pcb **
+** Created on 2026-08-17T19:29:11 **
+** Report includes: Errors, Warnings, Exclusions **
+
+** Found 7 DRC violations **
+[lib_footprint_mismatch]: Footprint 'TerminalBlock_Phoenix_MPT-0,5-3-2.54_1x03_P2.54mm_Horizontal' does not match copy in library 'TerminalBlock_Phoenix'
+    Local override; warning
+    @(89.5400 mm, 64.9200 mm): Footprint J6
+[lib_footprint_mismatch]: Footprint 'TerminalBlock_Phoenix_MPT-0,5-4-2.54_1x04_P2.54mm_Horizontal' does not match copy in library 'TerminalBlock_Phoenix'
+    Local override; warning
+    @(89.0000 mm, 74.3800 mm): Footprint J4
+[lib_footprint_mismatch]: Footprint 'TerminalBlock_Phoenix_MPT-0,5-4-2.54_1x04_P2.54mm_Horizontal' does not match copy in library 'TerminalBlock_Phoenix'
+    Local override; warning
+    @(89.0000 mm, 86.9200 mm): Footprint J5
+[lib_footprint_mismatch]: Footprint 'TerminalBlock_Phoenix_MPT-0,5-2-2.54_1x02_P2.54mm_Horizontal' does not match copy in library 'TerminalBlock_Phoenix'
+    Local override; warning
+    @(140.0000 mm, 96.0000 mm): Footprint J8
+[lib_footprint_mismatch]: Footprint 'TerminalBlock_Phoenix_MPT-0,5-3-2.54_1x03_P2.54mm_Horizontal' does not match copy in library 'TerminalBlock_Phoenix'
+    Local override; warning
+    @(129.4600 mm, 95.9675 mm): Footprint J2
+[lib_footprint_mismatch]: Footprint 'TerminalBlock_Phoenix_MPT-0,5-3-2.54_1x03_P2.54mm_Horizontal' does not match copy in library 'TerminalBlock_Phoenix'
+    Local override; warning
+    @(114.9200 mm, 96.0000 mm): Footprint J3
+[lib_footprint_mismatch]: Footprint 'PinSocket_2x20_P2.54mm_Vertical' does not match copy in library 'Connector_PinSocket_2.54mm'
+    Local override; warning
+    @(108.3700 mm, 48.7700 mm): Footprint J1
+
+** Found 3 unconnected pads **
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(102.0000 mm, 75.5250 mm): Pad 2 [Net-(U6-GND)] of C3 on F.Cu
+    @(108.0000 mm, 75.0000 mm): Pad 2 [Net-(U6-GND)] of C4 on F.Cu
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(105.5400 mm, 69.9500 mm): PTH pad 2 [Net-(U6-GND)] of U6
+    @(94.0000 mm, 52.8100 mm): Track [Net-(U6-GND)] on B.Cu, length 2.1900 mm
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(108.0000 mm, 75.0000 mm): Pad 2 [Net-(U6-GND)] of C4 on F.Cu
+    @(105.5400 mm, 69.9500 mm): PTH pad 2 [Net-(U6-GND)] of U6
+
+** Found 0 Footprint errors **
+
+** Ignored checks **
+    - Footprint has no courtyard defined
+    - Track endpoint not centered on via
+    - Tuning profile track geometries
+    - Footprint doesn't match symbol's footprint filters
+    - PTH inside courtyard
+    - NPTH inside courtyard
+
+** End of Report **

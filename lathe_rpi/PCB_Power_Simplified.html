@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MbW Lathe HAT – Simplified Power (Buck Only + RPi 3.3V)</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #f5f5f5;
+    color: #333;
+    padding: 20px;
+  }
+  h1 { text-align: center; font-size: 20px; color: #1a73e8; margin-bottom: 4px; }
+  .subtitle { text-align: center; font-size: 12px; color: #666; margin-bottom: 20px; }
+
+  .canvas {
+    position: relative;
+    width: 1000px;
+    height: 800px;
+    margin: 0 auto;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    overflow: hidden;
+  }
+  .canvas::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px);
+    background-size: 20px 20px;
+    pointer-events: none;
+  }
+
+  .wires {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .wires line, .wires polyline { stroke-width: 1.8; fill: none; }
+
+  .comp {
+    position: absolute;
+    z-index: 10;
+    text-align: center;
+  }
+  .comp-body {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 2px solid;
+    background: #fff;
+    display: inline-block;
+  }
+  .comp-desig { font-size: 11px; font-weight: 700; display: block; }
+  .comp-type { font-size: 8px; color: #666; display: block; margin-top: 2px; }
+  .comp-pins {
+    display: flex; flex-direction: column; gap: 2px;
+    margin-top: 4px; font-size: 7px; color: #555;
+    text-align: left; padding: 0 4px;
+  }
+  .comp-pin { display: flex; justify-content: space-between; gap: 6px; }
+  .pin-num { color: #999; min-width: 45px; }
+  .pin-net { font-weight: 600; }
+
+  .comp-ic .comp-body { border-color: #1a73e8; background: #e8f0fe; }
+  .comp-ic .comp-desig { color: #1a73e8; }
+  .comp-reg .comp-body { border-color: #f9ab00; background: #fef7e0; }
+  .comp-reg .comp-desig { color: #e37400; }
+  .comp-passive .comp-body { border-color: #999; background: #fafafa; }
+  .comp-passive .comp-desig { color: #555; }
+  .comp-diode .comp-body { border-color: #ea4335; background: #fce8e6; }
+  .comp-diode .comp-desig { color: #c5221f; }
+  .comp-ind .comp-body { border-color: #f9ab00; background: #fef7e0; }
+  .comp-ind .comp-desig { color: #e37400; }
+  .comp-conn .comp-body { border-color: #9334e6; background: #f3e8fd; }
+  .comp-conn .comp-desig { color: #9334e6; }
+  .comp-power .comp-body { border-color: #d93025; background: #fce8e6; }
+  .comp-power .comp-desig { color: #d93025; }
+  .comp-rpi .comp-body { border-color: #c5221f; background: #fce8e6; }
+  .comp-rpi .comp-desig { color: #c5221f; }
+
+  .net-label {
+    position: absolute;
+    font-size: 8px;
+    font-weight: 700;
+    padding: 2px 5px;
+    border-radius: 3px;
+    background: #fff;
+    border: 1px solid #ddd;
+    z-index: 5;
+    white-space: nowrap;
+  }
+
+  .section-box {
+    position: absolute;
+    border: 2px solid #1a73e8;
+    border-radius: 8px;
+    background: rgba(26,115,232,0.02);
+    z-index: 0;
+  }
+  .section-title {
+    position: absolute;
+    top: -10px;
+    left: 10px;
+    background: #fff;
+    padding: 0 6px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #1a73e8;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    z-index: 2;
+  }
+
+  .info-box {
+    position: absolute;
+    background: #f0f6ff;
+    border: 1px solid #b3d4fc;
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 10px;
+    line-height: 1.6;
+    z-index: 20;
+    max-width: 300px;
+  }
+  .info-box strong { color: #1a73e8; }
+  .info-box code {
+    background: #e8eaed;
+    padding: 1px 4px;
+    border-radius: 2px;
+    font-size: 9px;
+  }
+
+  .legend {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 9px;
+    z-index: 20;
+  }
+  .legend-title { font-weight: 700; margin-bottom: 4px; font-size: 10px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; margin: 2px 0; }
+  .legend-dot { width: 14px; height: 3px; border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<h1>MbW Lathe HAT – Simplified Power Architecture</h1>
+<p class="subtitle">MP2307 buck 12V→5V only · RPi provides 3.3V · Diode OR-ing powers RPi from buck when 12V present</p>
+
+<div class="canvas">
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- SECTIONS -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="section-box" style="left:20px; top:20px; width:420px; height:260px;">
+    <span class="section-title">⚡ 12V Input &amp; Protection</span>
+  </div>
+  <div class="section-box" style="left:440px; top:20px; width:340px; height:260px;">
+    <span class="section-title">🔋 MP2307 Buck 12V→5V</span>
+  </div>
+  <div class="section-box" style="left:20px; top:300px; width:760px; height:220px;">
+    <span class="section-title">🔗 Diode OR-ing (Buck ↔ RPi)</span>
+  </div>
+  <div class="section-box" style="left:800px; top:20px; width:180px; height:500px;">
+    <span class="section-title">🍓 Raspberry Pi GPIO</span>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- WIRES -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <svg class="wires" viewBox="0 0 1000 800">
+
+    <!-- ── 12V Input → Fuse → VIN_12V ── -->
+    <line x1="60" y1="100" x2="100" y2="100" stroke="#d93025" stroke-width="2.5"/>
+    <line x1="140" y1="100" x2="200" y2="100" stroke="#d93025" stroke-width="2.5"/>
+    <!-- VIN_12V horizontal bus -->
+    <line x1="200" y1="100" x2="440" y2="100" stroke="#d93025" stroke-width="2.5"/>
+
+    <!-- D8 TVS: VIN_12V → GND -->
+    <line x1="250" y1="100" x2="250" y2="140" stroke="#ea4335"/>
+    <line x1="250" y1="160" x2="250" y2="200" stroke="#666"/>
+    <!-- C7: VIN_12V → GND -->
+    <line x1="310" y1="100" x2="310" y2="140" stroke="#34a853"/>
+    <line x1="310" y1="160" x2="310" y2="200" stroke="#666"/>
+    <!-- C8: VIN_12V → GND -->
+    <line x1="370" y1="100" x2="370" y2="140" stroke="#34a853"/>
+    <line x1="370" y1="160" x2="370" y2="200" stroke="#666"/>
+
+    <!-- GND bus (top section) -->
+    <line x1="200" y1="200" x2="440" y2="200" stroke="#666" stroke-width="2.5"/>
+
+    <!-- ── VIN_12V → MP2307 Pin1 ── -->
+    <line x1="440" y1="100" x2="480" y2="100" stroke="#d93025" stroke-width="2"/>
+
+    <!-- MP2307 Pin4,8 → GND -->
+    <line x1="480" y1="180" x2="480" y2="200" stroke="#666"/>
+    <line x1="560" y1="180" x2="560" y2="200" stroke="#666"/>
+
+    <!-- MP2307 Pin2 EN → VIN_12V (self-enable, always on when 12V present) -->
+    <line x1="480" y1="120" x2="460" y2="120" stroke="#d93025"/>
+    <line x1="460" y1="120" x2="460" y2="100" stroke="#d93025"/>
+
+    <!-- MP2307 Pin3 SW → L1 -->
+    <line x1="560" y1="140" x2="620" y2="140" stroke="#f9ab00" stroke-width="2"/>
+
+    <!-- L1 → D9 → 5V0_BUCK -->
+    <line x1="680" y1="140" x2="720" y2="140" stroke="#f9ab00" stroke-width="2"/>
+    <line x1="760" y1="140" x2="800" y2="140" stroke="#f0883e" stroke-width="2.5"/>
+
+    <!-- C11 BOOT→SW -->
+    <line x1="560" y1="160" x2="590" y2="160" stroke="#f9ab00"/>
+    <line x1="590" y1="160" x2="590" y2="140" stroke="#f9ab00"/>
+
+    <!-- R24 RT→GND -->
+    <line x1="560" y1="170" x2="590" y2="170" stroke="#999"/>
+    <line x1="590" y1="170" x2="590" y2="200" stroke="#666"/>
+
+    <!-- C1: VIN→GND (near buck) -->
+    <line x1="440" y1="100" x2="440" y2="140" stroke="#34a853"/>
+    <line x1="440" y1="160" x2="440" y2="200" stroke="#666"/>
+
+    <!-- ── 5V0_BUCK bus (horizontal) ── -->
+    <line x1="800" y1="140" x2="800" y2="200" stroke="#f0883e" stroke-width="2.5"/>
+    <line x1="800" y1="200" x2="800" y2="300" stroke="#f0883e" stroke-width="2.5"/>
+
+    <!-- C9, C10: 5V0_BUCK → GND -->
+    <line x1="760" y1="200" x2="760" y2="240" stroke="#34a853"/>
+    <line x1="760" y1="260" x2="760" y2="300" stroke="#666"/>
+    <line x1="720" y1="200" x2="720" y2="240" stroke="#34a853"/>
+    <line x1="720" y1="260" x2="720" y2="300" stroke="#666"/>
+
+    <!-- GND bus (buck area) -->
+    <line x1="440" y1="200" x2="600" y2="200" stroke="#666" stroke-width="2.5"/>
+    <line x1="700" y1="300" x2="800" y2="300" stroke="#666" stroke-width="2.5"/>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- DIODE OR-ING: 5V0_BUCK ↔ RPi Pin 2,4 -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+
+    <!-- 5V0_BUCK → D11 (buck diode) → 5V0 rail -->
+    <line x1="800" y1="340" x2="800" y2="380" stroke="#f0883e" stroke-width="2"/>
+    <line x1="800" y1="380" x2="850" y2="380" stroke="#f0883e"/>
+    <!-- D11 cathode → 5V0 -->
+    <line x1="890" y1="380" x2="920" y2="380" stroke="#f0883e" stroke-width="2.5"/>
+
+    <!-- RPi Pin 2 (5V) → D12 (RPi diode) → 5V0 rail -->
+    <line x1="850" y1="440" x2="850" y2="440" stroke="#f0883e"/>
+    <line x1="850" y1="440" x2="890" y2="440" stroke="#f0883e"/>
+    <!-- D12 cathode → 5V0 -->
+    <line x1="930" y1="440" x2="920" y2="440" stroke="#f0883e" stroke-width="2.5"/>
+
+    <!-- 5V0 rail vertical bus -->
+    <line x1="920" y1="380" x2="920" y2="440" stroke="#f0883e" stroke-width="3"/>
+
+    <!-- 5V0 rail → HAT logic -->
+    <line x1="920" y1="410" x2="960" y2="410" stroke="#f0883e" stroke-width="2"/>
+
+    <!-- 5V0 rail → RPi Pin 2,4 (back-feed to power RPi) -->
+    <line x1="920" y1="380" x2="960" y2="380" stroke="#f0883e" stroke-width="2"/>
+    <line x1="960" y1="380" x2="960" y2="100" stroke="#f0883e" stroke-width="2"/>
+    <line x1="960" y1="100" x2="960" y2="120" stroke="#f0883e" stroke-width="2"/>
+
+    <!-- 5V0 → RPi Pin 4 -->
+    <line x1="960" y1="100" x2="960" y2="140" stroke="#f0883e" stroke-width="2"/>
+
+    <!-- C5: 5V0 → GND -->
+    <line x1="960" y1="410" x2="960" y2="450" stroke="#34a853"/>
+    <line x1="960" y1="470" x2="960" y2="500" stroke="#666"/>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- 3V3 from RPi → HAT logic -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- RPi Pin 1 (3.3V) → 3V3 rail -->
+    <line x1="960" y1="80" x2="920" y2="80" stroke="#34a853" stroke-width="2.5"/>
+    <line x1="920" y1="80" x2="920" y2="540" stroke="#34a853" stroke-width="2.5"/>
+
+    <!-- 3V3 rail → HAT logic (ADS1015, pull-ups, etc.) -->
+    <line x1="920" y1="540" x2="800" y2="540" stroke="#34a853" stroke-width="2.5"/>
+
+    <!-- C6: 3V3 → GND -->
+    <line x1="880" y1="540" x2="880" y2="580" stroke="#34a853"/>
+    <line x1="880" y1="600" x2="880" y2="640" stroke="#666"/>
+
+    <!-- GND bus (OR-ing area) -->
+    <line x1="700" y1="640" x2="960" y2="640" stroke="#666" stroke-width="3"/>
+    <line x1="700" y1="300" x2="700" y2="640" stroke="#666" stroke-width="2.5"/>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- RPi GPIO connections -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- RPi Pin 1: 3.3V (source) -->
+    <line x1="850" y1="80" x2="880" y2="80" stroke="#34a853"/>
+    <!-- RPi Pin 2: 5V (sink from buck via OR-ing) -->
+    <line x1="850" y1="100" x2="880" y2="100" stroke="#f0883e"/>
+    <!-- RPi Pin 3: SDA -->
+    <line x1="850" y1="120" x2="880" y2="120" stroke="#9334e6"/>
+    <!-- RPi Pin 4: 5V (sink) -->
+    <line x1="850" y1="140" x2="880" y2="140" stroke="#f0883e"/>
+    <!-- RPi Pin 5: SCL -->
+    <line x1="850" y1="160" x2="880" y2="160" stroke="#9334e6"/>
+    <!-- RPi Pin 6: GND -->
+    <line x1="850" y1="180" x2="880" y2="180" stroke="#666"/>
+    <!-- RPi Pin 17: 3.3V (source, redundant) -->
+    <line x1="850" y1="200" x2="880" y2="200" stroke="#34a853"/>
+
+    <!-- GND from RPi -->
+    <line x1="880" y1="180" x2="880" y2="640" stroke="#666" stroke-width="2"/>
+
+  </svg>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- NET LABELS -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="net-label" style="left:205px; top:85px; color:#d93025; border-color:#d93025;">VIN_12V</div>
+  <div class="net-label" style="left:805px; top:125px; color:#f0883e; border-color:#f0883e;">5V0_BUCK</div>
+  <div class="net-label" style="left:925px; top:395px; color:#f0883e; border-color:#f0883e;">5V0 Rail</div>
+  <div class="net-label" style="left:805px; top:525px; color:#34a853; border-color:#34a853;">3V3 Rail (from RPi)</div>
+  <div class="net-label" style="left:705px; top:625px; color:#666; border-color:#666;">GND</div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- COMPONENTS -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+
+  <!-- J17 DC Jack -->
+  <div class="comp comp-power" style="left:10px; top:75px; width:50px;">
+    <div class="comp-body">
+      <span class="comp-desig">J17</span>
+      <span class="comp-type">DC Jack</span>
+    </div>
+  </div>
+
+  <!-- F1 Fuse -->
+  <div class="comp comp-passive" style="left:100px; top:85px; width:40px;">
+    <div class="comp-body">
+      <span class="comp-desig">F1</span>
+      <span class="comp-type">1A</span>
+    </div>
+  </div>
+
+  <!-- D8 TVS -->
+  <div class="comp comp-diode" style="left:235px; top:140px; width:30px;">
+    <div class="comp-body">
+      <span class="comp-desig">D8</span>
+      <span class="comp-type">TVS</span>
+    </div>
+  </div>
+
+  <!-- C7 -->
+  <div class="comp comp-passive" style="left:295px; top:140px; width:30px;">
+    <div class="comp-body">
+      <span class="comp-desig">C7</span>
+      <span class="comp-type">10µF</span>
+    </div>
+  </div>
+
+  <!-- C8 -->
+  <div class="comp comp-passive" style="left:355px; top:140px; width:30px;">
+    <div class="comp-body">
+      <span class="comp-desig">C8</span>
+      <span class="comp-type">100nF</span>
+    </div>
+  </div>
+
+  <!-- C1 Buck input cap -->
+  <div class="comp comp-passive" style="left:425px; top:140px; width:30px;">
+    <div class="comp-body">
+      <span class="comp-desig">C1</span>
+      <span class="comp-type">10µF</span>
+    </div>
+  </div>
+
+  <!-- U3 MP2307 -->
+  <div class="comp comp-reg" style="left:480px; top:80px; width:140px;">
+    <div class="comp-body">
+      <span class="comp-desig">U3</span>
+      <span class="comp-type">MP2307DN-5.0 SOP-8</span>
+      <div class="comp-pins">
+        <div class="comp-pin"><span class="pin-num">1 VIN</span><span class="pin-net" style="color:#d93025">← VIN_12V</span></div>
+        <div class="comp-pin"><span class="pin-num">2 EN</span><span class="pin-net" style="color:#d93025">← VIN_12V</span></div>
+        <div class="comp-pin"><span class="pin-num">3 SW</span><span class="pin-net" style="color:#f9ab00">→ L1</span></div>
+        <div class="comp-pin"><span class="pin-num">4 GND</span><span class="pin-net" style="color:#666">→ GND</span></div>
+        <div class="comp-pin"><span class="pin-num">5 BOOT</span><span class="pin-net" style="color:#f9ab00">→ C11→SW</span></div>
+        <div class="comp-pin"><span class="pin-num">6 RT</span><span class="pin-net" style="color:#999">→ R24→GND</span></div>
+        <div class="comp-pin"><span class="pin-num">7 FB</span><span class="pin-net" style="color:#666">→ GND</span></div>
+        <div class="comp-pin"><span class="pin-num">8 GND</span><span class="pin-net" style="color:#666">→ GND</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- L1 -->
+  <div class="comp comp-ind" style="left:620px; top:120px; width:60px;">
+    <div class="comp-body">
+      <span class="comp-desig">L1</span>
+      <span class="comp-type">10µH</span>
+    </div>
+  </div>
+
+  <!-- D9 Schottky -->
+  <div class="comp comp-diode" style="left:720px; top:120px; width:40px;">
+    <div class="comp-body">
+      <span class="comp-desig">D9</span>
+      <span class="comp-type">SS34</span>
+    </div>
+  </div>
+
+  <!-- C11 Bootstrap -->
+  <div class="comp comp-passive" style="left:575px; top:160px; width:30px;">
+    <div class="comp-body">
+      <span class="comp-desig">C11</span>
+      <span class="comp-type">100nF</span>
+    </div>
+  </div>
+
+  <!-- R24 -->
+  <div class="comp comp-passive" style="left:575px; top:175px; width:30px;">
+    <div class="comp-body">
+      <span class="comp-desig">R24</span>
+      <span class="comp-type">22kΩ</span>
+    </div>
+  </div>
+
+  <!-- C9 Output cap -->
+  <div class="comp comp-passive" style="left:745px; top:240px; width:30px;">
+    <div class="comp-body">
+      <span class="comp-desig">C9</span>
+      <span class="comp-type">22µF</span>
+    </div>
+  </div>
+
+  <!-- C10 Output decoupling -->
+  <div class="comp comp-passive" style="left:705px; top:240px; width:30px;">
+    <div class="comp-body">
+      <span class="comp-desig">C10</span>
+      <span class="comp-type">100nF</span>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- DIODE OR-ING -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+
+  <!-- D11: Buck → 5V0 -->
+  <div class="comp comp-diode" style="left:850px; top:365px; width:40px;">
+    <div class="comp-body">
+      <span class="comp-desig">D11</span>
+      <span class="comp-type">SS34</span>
+    </div>
+  </div>
+
+  <!-- D12: RPi → 5V0 -->
+  <div class="comp comp-diode" style="left:850px; top:425px; width:40px;">
+    <div class="comp-body">
+      <span class="comp-desig">D12</span>
+      <span class="comp-type">SS34</span>
+    </div>
+  </div>
+
+  <!-- C5 5V0 bulk -->
+  <div class="comp comp-passive" style="left:945px; top:450px; width:30px;">
+    <div class="comp-body">
+      <span class="comp-desig">C5</span>
+      <span class="comp-type">10µF</span>
+    </div>
+  </div>
+
+  <!-- C6 3V3 bulk -->
+  <div class="comp comp-passive" style="left:865px; top:580px; width:30px;">
+    <div class="comp-body">
+      <span class="comp-desig">C6</span>
+      <span class="comp-type">10µF</span>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- RPi GPIO Header -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+
+  <div class="comp comp-rpi" style="left:880px; top:60px; width:120px;">
+    <div class="comp-body">
+      <span class="comp-desig">J1</span>
+      <span class="comp-type">RPi 40-Pin GPIO Header</span>
+      <div class="comp-pins">
+        <div class="comp-pin"><span class="pin-num">Pin 1</span><span class="pin-net" style="color:#34a853">3.3V → HAT</span></div>
+        <div class="comp-pin"><span class="pin-num">Pin 2</span><span class="pin-net" style="color:#f0883e">5V ← HAT</span></div>
+        <div class="comp-pin"><span class="pin-num">Pin 3</span><span class="pin-net" style="color:#9334e6">SDA</span></div>
+        <div class="comp-pin"><span class="pin-num">Pin 4</span><span class="pin-net" style="color:#f0883e">5V ← HAT</span></div>
+        <div class="comp-pin"><span class="pin-num">Pin 5</span><span class="pin-net" style="color:#9334e6">SCL</span></div>
+        <div class="comp-pin"><span class="pin-num">Pin 6</span><span class="pin-net" style="color:#666">GND</span></div>
+        <div class="comp-pin"><span class="pin-num">Pin 17</span><span class="pin-net" style="color:#34a853">3.3V → HAT</span></div>
+        <div class="comp-pin"><span class="pin-num">...</span><span class="pin-net">GPIO signals</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- INFO BOXES -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+
+  <div class="info-box" style="left:20px; top:540px;">
+    <strong>🔗 Diode OR-ing Logic</strong><br><br>
+    <strong>When 12V is present:</strong><br>
+    Buck outputs 5V → D11 conducts → 5V0 rail active<br>
+    5V0 rail feeds RPi Pin 2,4 (powers the Pi)<br>
+    D12 is reverse-biased (RPi has no USB-C power)<br><br>
+    <strong>When no 12V (USB-C only):</strong><br>
+    RPi USB-C powers Pi internally<br>
+    RPi Pin 2 outputs 5V → D12 conducts → 5V0 rail<br>
+    D11 is reverse-biased (buck has no 12V input)<br>
+    HAT logic runs from RPi back-fed power ✓
+  </div>
+
+  <div class="info-box" style="left:340px; top:540px;">
+    <strong>📋 Simplified BOM Changes</strong><br><br>
+    <strong>Removed:</strong><br>
+    ✗ U4 AP2112 LDO (no 3.3V regulator needed)<br>
+    ✗ C12, C13, C14 (LDO caps)<br>
+    ✗ D14, D15 (3.3V OR-ing diodes)<br>
+    ✗ D13 (12V reverse protection — not needed)<br><br>
+    <strong>Remaining diodes:</strong><br>
+    ✓ D9 SS34 (buck freewheel)<br>
+    ✓ D11 SS34 (buck → 5V0 OR-ing)<br>
+    ✓ D12 SS34 (RPi → 5V0 OR-ing)<br>
+    Total: <strong>3 Schottky diodes</strong> (was 7)
+  </div>
+
+  <div class="info-box" style="left:640px; top:540px;">
+    <strong>⚡ Power Flow Summary</strong><br><br>
+    <strong>12V mode (normal):</strong><br>
+    12V → Buck → 5V0 → D11 → RPi Pin 2,4<br>
+    RPi generates 3.3V internally → Pin 1 → HAT<br><br>
+    <strong>USB-C mode (debug):</strong><br>
+    USB-C → RPi → Pin 2 → D12 → 5V0 rail<br>
+    RPi → Pin 1 → 3V3 rail → HAT logic<br><br>
+    <strong>EN pin:</strong> Tied to VIN_12V (always on when 12V present, off when absent)
+  </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <div class="legend-title">Net Colors</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#d93025"></div> 12V Input</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f9ab00"></div> SW / Buck internal</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f0883e"></div> 5V0 Rail</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#34a853"></div> 3V3 (from RPi)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#9334e6"></div> I2C</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#666"></div> GND</div>
+  </div>
+</div>
+
+</body>
+</html>

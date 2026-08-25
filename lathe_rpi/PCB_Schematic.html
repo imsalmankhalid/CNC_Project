@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MbW Lathe HAT – Pin Connection Schematic</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #0d1117;
+    color: #c9d1d9;
+    padding: 20px;
+  }
+  h1 {
+    text-align: center;
+    color: #58a6ff;
+    margin-bottom: 8px;
+    font-size: 24px;
+  }
+  .subtitle {
+    text-align: center;
+    color: #8b949e;
+    margin-bottom: 24px;
+    font-size: 13px;
+  }
+  .section {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .section h2 {
+    color: #58a6ff;
+    font-size: 16px;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #30363d;
+  }
+  .chip-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    justify-content: center;
+    align-items: flex-start;
+  }
+  .chip {
+    position: relative;
+    display: inline-block;
+  }
+  .chip-title {
+    text-align: center;
+    font-weight: 600;
+    font-size: 13px;
+    color: #f0883e;
+    margin-bottom: 8px;
+  }
+  .chip svg {
+    display: block;
+  }
+  .pin-label {
+    font-size: 9px;
+    fill: #8b949e;
+  }
+  .pin-name {
+    font-size: 9px;
+    font-weight: 600;
+  }
+  .net-3v3 { fill: #3fb950; }
+  .net-5v0 { fill: #f0883e; }
+  .net-gnd { fill: #6e7681; }
+  .net-signal { fill: #58a6ff; }
+  .net-i2c { fill: #d2a8ff; }
+  .net-input { fill: #79c0ff; }
+  .net-12v { fill: #ff7b72; }
+  .net-buck { fill: #ffa657; }
+  .net-ldo { fill: #7ee787; }
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 20px;
+    font-size: 11px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .flow-diagram {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+  .flow-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .flow-box {
+    background: #21262d;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    padding: 8px 14px;
+    font-size: 12px;
+    text-align: center;
+    min-width: 100px;
+  }
+  .flow-box.power { border-color: #f0883e; color: #f0883e; }
+  .flow-box.ground { border-color: #6e7681; color: #6e7681; }
+  .flow-box.signal { border-color: #58a6ff; color: #58a6ff; }
+  .flow-box.i2c { border-color: #d2a8ff; color: #d2a8ff; }
+  .flow-box.input { border-color: #79c0ff; color: #79c0ff; }
+  .flow-box.v12 { border-color: #ff7b72; color: #ff7b72; }
+  .flow-arrow {
+    color: #484f58;
+    font-size: 18px;
+  }
+  .flow-label {
+    font-size: 10px;
+    color: #8b949e;
+    text-align: center;
+  }
+  .connector-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+  }
+  .connector-card {
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    padding: 12px;
+  }
+  .connector-card h3 {
+    font-size: 12px;
+    color: #f0883e;
+    margin-bottom: 8px;
+  }
+  .connector-card table {
+    width: 100%;
+    font-size: 11px;
+    border-collapse: collapse;
+  }
+  .connector-card td {
+    padding: 2px 6px;
+    border-bottom: 1px solid #21262d;
+  }
+  .connector-card td:first-child {
+    color: #8b949e;
+    width: 40px;
+  }
+  .connector-card td:last-child {
+    text-align: right;
+    color: #8b949e;
+    font-size: 10px;
+  }
+  .tab-bar {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .tab-btn {
+    background: #21262d;
+    border: 1px solid #30363d;
+    color: #8b949e;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.15s;
+  }
+  .tab-btn:hover { background: #30363d; color: #c9d1d9; }
+  .tab-btn.active { background: #1f6feb; color: #fff; border-color: #1f6feb; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+</style>
+</head>
+<body>
+
+<h1>MbW Lathe HAT – Pin Connection Schematic</h1>
+<p class="subtitle">12V DC jack on HAT · RPi native USB-C · 74HC245 level shifting · ADS1015 ADC</p>
+
+<div class="legend">
+  <div class="legend-item"><span class="legend-dot" style="background:#3fb950"></span> 3.3V</div>
+  <div class="legend-item"><span class="legend-dot" style="background:#f0883e"></span> 5.0V</div>
+  <div class="legend-item"><span class="legend-dot" style="background:#ff7b72"></span> 12V</div>
+  <div class="legend-item"><span class="legend-dot" style="background:#6e7681"></span> GND</div>
+  <div class="legend-item"><span class="legend-dot" style="background:#58a6ff"></span> Signal (3.3V→5V)</div>
+  <div class="legend-item"><span class="legend-dot" style="background:#d2a8ff"></span> I2C</div>
+  <div class="legend-item"><span class="legend-dot" style="background:#79c0ff"></span> Input</div>
+</div>
+
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="showTab('power')">⚡ Power</button>
+  <button class="tab-btn" onclick="showTab('levelshift')">🔄 74HC245</button>
+  <button class="tab-btn" onclick="showTab('adc')">📊 ADS1015</button>
+  <button class="tab-btn" onclick="showTab('gpio')">🔌 GPIO Map</button>
+  <button class="tab-btn" onclick="showTab('connectors')">🔗 Connectors</button>
+</div>
+
+<!-- ==================== POWER TAB ==================== -->
+<div id="tab-power" class="tab-content active">
+<div class="section">
+  <h2>Power Architecture – 12V Input → Buck + LDO → OR-ing → RPi</h2>
+
+  <!-- DC Jack -->
+  <div class="chip-container" style="margin-bottom:20px">
+    <div class="chip">
+      <div class="chip-title">J17 DC Jack – 12V Input (2.1mm Barrel)</div>
+      <svg width="260" height="180" viewBox="0 0 260 180">
+        <!-- Jack body -->
+        <rect x="80" y="20" width="100" height="140" rx="6" fill="#1c2333" stroke="#ff7b72" stroke-width="1.5"/>
+        <text x="130" y="50" text-anchor="middle" fill="#ff7b72" font-size="11" font-weight="700">DC JACK</text>
+        <text x="130" y="65" text-anchor="middle" fill="#8b949e" font-size="8">2.1mm barrel</text>
+
+        <!-- Pin 1 (center = 12V) -->
+        <line x1="80" y1="85" x2="40" y2="85" stroke="#ff7b72" stroke-width="2"/>
+        <text x="35" y="88" text-anchor="end" class="pin-name" fill="#ff7b72">12V</text>
+        <text x="35" y="98" text-anchor="end" class="pin-label">Center pin</text>
+        <text x="75" y="88" text-anchor="end" class="pin-label">1</text>
+
+        <!-- Pin 2 (sleeve = GND) -->
+        <line x1="80" y1="115" x2="40" y2="115" stroke="#6e7681" stroke-width="2"/>
+        <text x="35" y="118" text-anchor="end" class="pin-name net-gnd">GND</text>
+        <text x="35" y="128" text-anchor="end" class="pin-label">Sleeve</text>
+        <text x="75" y="118" text-anchor="end" class="pin-label">2</text>
+
+        <!-- Pin 3 (switch = unused) -->
+        <line x1="180" y1="85" x2="220" y2="85" stroke="#484f58" stroke-width="1" stroke-dasharray="3,2"/>
+        <text x="225" y="88" class="pin-label">SW (NC)</text>
+        <text x="185" y="88" class="pin-label">3</text>
+
+        <!-- Output traces -->
+        <line x1="180" y1="115" x2="220" y2="115" stroke="#ff7b72" stroke-width="2"/>
+        <text x="225" y="118" class="pin-label" fill="#ff7b72">→ F1 → VIN_12V</text>
+        <text x="185" y="118" class="pin-label">1</text>
+
+        <line x1="180" y1="145" x2="220" y2="145" stroke="#6e7681" stroke-width="2"/>
+        <text x="225" y="148" class="pin-label net-gnd">→ GND plane</text>
+        <text x="185" y="148" class="pin-label">2</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- After DC Jack: Fuse + TVS + Caps -->
+  <div class="chip-container" style="margin-bottom:20px">
+    <div class="chip">
+      <div class="chip-title">Input Protection – Fuse, TVS, Capacitors</div>
+      <svg width="500" height="120" viewBox="0 0 500 120">
+        <!-- Flow -->
+        <text x="10" y="30" fill="#ff7b72" font-size="10" font-weight="700">J17-1 (12V)</text>
+        <line x1="90" y1="27" x2="130" y2="27" stroke="#ff7b72" stroke-width="2"/>
+        <text x="135" y="30" fill="#ffa657" font-size="10" font-weight="700">F1 1A Fuse</text>
+        <line x1="220" y1="27" x2="260" y2="27" stroke="#ff7b72" stroke-width="2"/>
+        <text x="265" y="30" fill="#8b949e" font-size="10" font-weight="700">VIN_12V rail</text>
+
+        <!-- TVS to GND -->
+        <line x1="310" y1="30" x2="310" y2="70" stroke="#f0883e" stroke-width="1.5"/>
+        <text x="315" y="80" fill="#f0883e" font-size="9">D8 SMAJ5.0A</text>
+        <text x="315" y="92" fill="#8b949e" font-size="8">TVS → GND</text>
+
+        <!-- C7 to GND -->
+        <line x1="380" y1="30" x2="380" y2="70" stroke="#3fb950" stroke-width="1.5"/>
+        <text x="385" y="80" fill="#3fb950" font-size="9">C7 10µF</text>
+        <text x="385" y="92" fill="#8b949e" font-size="8">Bulk → GND</text>
+
+        <!-- C8 to GND -->
+        <line x1="440" y1="30" x2="440" y2="70" stroke="#3fb950" stroke-width="1.5"/>
+        <text x="445" y="80" fill="#3fb950" font-size="9">C8 100nF</text>
+        <text x="445" y="92" fill="#8b949e" font-size="8">Decoupling → GND</text>
+
+        <!-- GND line -->
+        <line x1="10" y1="110" x2="490" y2="110" stroke="#6e7681" stroke-width="1.5"/>
+        <text x="250" y="105" text-anchor="middle" fill="#6e7681" font-size="8">GND (J17-2 sleeve)</text>
+
+        <!-- Splits to regulators -->
+        <text x="10" y="55" fill="#8b949e" font-size="9">VIN_12V splits →</text>
+        <text x="10" y="70" fill="#ffa657" font-size="9">  ├─ U3 MP2307 (Pin 1 VIN)</text>
+        <text x="10" y="85" fill="#7ee787" font-size="9">  └─ U4 AP2112 (Pin 1 VIN)</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- MP2307 Buck Regulator -->
+  <div class="chip-container" style="margin-bottom:20px">
+    <div class="chip">
+      <div class="chip-title">U3 MP2307DN – Buck Regulator 12V→5V Fixed (SOP-8)</div>
+      <svg width="400" height="280" viewBox="0 0 400 280">
+        <!-- Chip body -->
+        <rect x="140" y="20" width="120" height="240" rx="4" fill="#1c2333" stroke="#ffa657" stroke-width="1.5"/>
+        <text x="200" y="130" text-anchor="middle" fill="#ffa657" font-size="11" font-weight="700">MP2307</text>
+        <text x="200" y="145" text-anchor="middle" fill="#8b949e" font-size="8">5V Fixed Buck</text>
+        <circle cx="150" cy="32" r="3" fill="#484f58"/>
+
+        <!-- Left pins (1-4) -->
+        <!-- Pin 1: VIN -->
+        <line x1="140" y1="50" x2="80" y2="50" stroke="#ff7b72" stroke-width="2"/>
+        <text x="75" y="53" text-anchor="end" class="pin-name" fill="#ff7b72">VIN</text>
+        <text x="75" y="63" text-anchor="end" class="pin-label">← VIN_12V</text>
+        <text x="135" y="53" text-anchor="end" class="pin-label">1</text>
+
+        <!-- Pin 2: BOOT -->
+        <line x1="140" y1="85" x2="80" y2="85" stroke="#f0883e" stroke-width="1.5"/>
+        <text x="75" y="88" text-anchor="end" class="pin-name" fill="#f0883e">BOOT</text>
+        <text x="75" y="98" text-anchor="end" class="pin-label">C11 100nF</text>
+        <text x="75" y="108" text-anchor="end" class="pin-label">SW→BOOT</text>
+        <text x="135" y="88" text-anchor="end" class="pin-label">2</text>
+
+        <!-- Pin 3: EN -->
+        <line x1="140" y1="120" x2="80" y2="120" stroke="#3fb950" stroke-width="1.5"/>
+        <text x="75" y="123" text-anchor="end" class="pin-name" fill="#3fb950">EN</text>
+        <text x="75" y="133" text-anchor="end" class="pin-label">R7 100k</text>
+        <text x="75" y="143" text-anchor="end" class="pin-label">VIN→EN</text>
+        <text x="135" y="123" text-anchor="end" class="pin-label">3</text>
+
+        <!-- Pin 4: GND -->
+        <line x1="140" y1="155" x2="80" y2="155" stroke="#6e7681" stroke-width="2"/>
+        <text x="75" y="158" text-anchor="end" class="pin-name net-gnd">GND</text>
+        <text x="75" y="168" text-anchor="end" class="pin-label">→ GND plane</text>
+        <text x="135" y="158" text-anchor="end" class="pin-label">4</text>
+
+        <!-- Right pins (5-8) -->
+        <!-- Pin 5: GND -->
+        <line x1="260" y1="155" x2="300" y2="155" stroke="#6e7681" stroke-width="2"/>
+        <text x="305" y="158" class="pin-name net-gnd">GND</text>
+        <text x="305" y="168" class="pin-label">→ GND plane</text>
+        <text x="265" y="158" class="pin-label">5</text>
+
+        <!-- Pin 6: SW -->
+        <line x1="260" y1="120" x2="300" y2="120" stroke="#f0883e" stroke-width="2"/>
+        <text x="305" y="123" class="pin-name" fill="#f0883e">SW</text>
+        <text x="305" y="133" class="pin-label">→ L1 10µH</text>
+        <text x="305" y="143" class="pin-label">→ C11 BOOT</text>
+        <text x="265" y="123" class="pin-label">6</text>
+
+        <!-- Pin 7: FB (internal) -->
+        <line x1="260" y1="85" x2="300" y2="85" stroke="#484f58" stroke-width="1" stroke-dasharray="3,2"/>
+        <text x="305" y="88" class="pin-label">FB (int)</text>
+        <text x="305" y="98" class="pin-label">Fixed 5V</text>
+        <text x="265" y="88" class="pin-label">7</text>
+
+        <!-- Pin 8: VOUT -->
+        <line x1="260" y1="50" x2="300" y2="50" stroke="#f0883e" stroke-width="2"/>
+        <text x="305" y="53" class="pin-name" fill="#f0883e">VOUT</text>
+        <text x="305" y="63" class="pin-label">← L1 + D9</text>
+        <text x="305" y="73" class="pin-label">→ 5V0_BUCK</text>
+        <text x="265" y="53" class="pin-label">8</text>
+
+        <!-- External component annotations -->
+        <text x="200" y="210" text-anchor="middle" fill="#8b949e" font-size="8">─ External Components ─</text>
+        <text x="200" y="225" text-anchor="middle" fill="#ffa657" font-size="8">L1 10µH: SW(Pin6) → VOUT(Pin8) + D9 anode</text>
+        <text x="200" y="238" text-anchor="middle" fill="#f0883e" font-size="8">D9 SS34: cathode→VOUT, anode→SW (Schottky freewheel)</text>
+        <text x="200" y="251" text-anchor="middle" fill="#3fb950" font-size="8">C9 22µF: VOUT→GND | C10 100nF: VOUT→GND | C1 10µF: VIN→GND</text>
+        <text x="200" y="264" text-anchor="middle" fill="#3fb950" font-size="8">C11 100nF: BOOT(Pin2)→SW(Pin6) | R7 100k: VIN(Pin1)→EN(Pin3)</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- AP2112 LDO Regulator -->
+  <div class="chip-container" style="margin-bottom:20px">
+    <div class="chip">
+      <div class="chip-title">U4 AP2112K-3.3 – LDO Regulator 12V→3.3V (SOT-223)</div>
+      <svg width="360" height="240" viewBox="0 0 360 240">
+        <!-- Chip body (SOT-223: 4 pins, tab = GND) -->
+        <rect x="130" y="20" width="100" height="180" rx="4" fill="#1c2333" stroke="#7ee787" stroke-width="1.5"/>
+        <text x="180" y="90" text-anchor="middle" fill="#7ee787" font-size="11" font-weight="700">AP2112</text>
+        <text x="180" y="105" text-anchor="middle" fill="#8b949e" font-size="8">3.3V LDO</text>
+        <circle cx="140" cy="32" r="3" fill="#484f58"/>
+
+        <!-- Left pins (1-2) -->
+        <!-- Pin 1: VIN -->
+        <line x1="130" y1="55" x2="70" y2="55" stroke="#ff7b72" stroke-width="2"/>
+        <text x="65" y="58" text-anchor="end" class="pin-name" fill="#ff7b72">VIN</text>
+        <text x="65" y="68" text-anchor="end" class="pin-label">← VIN_12V</text>
+        <text x="125" y="58" text-anchor="end" class="pin-label">1</text>
+
+        <!-- Pin 2: GND (tab also GND) -->
+        <line x1="130" y1="90" x2="70" y2="90" stroke="#6e7681" stroke-width="2"/>
+        <text x="65" y="93" text-anchor="end" class="pin-name net-gnd">GND</text>
+        <text x="65" y="103" text-anchor="end" class="pin-label">+ tab = GND</text>
+        <text x="125" y="93" text-anchor="end" class="pin-label">2</text>
+
+        <!-- Right pins (3-4) -->
+        <!-- Pin 3: GND -->
+        <line x1="230" y1="55" x2="270" y2="55" stroke="#6e7681" stroke-width="2"/>
+        <text x="275" y="58" class="pin-name net-gnd">GND</text>
+        <text x="275" y="68" class="pin-label">→ GND plane</text>
+        <text x="235" y="58" class="pin-label">3</text>
+
+        <!-- Pin 4: VOUT -->
+        <line x1="230" y1="90" x2="270" y2="90" stroke="#3fb950" stroke-width="2"/>
+        <text x="275" y="93" class="pin-name" fill="#3fb950">VOUT</text>
+        <text x="275" y="103" class="pin-label">→ 3V3_REG</text>
+        <text x="275" y="113" class="pin-label">→ D14 → 3V3</text>
+        <text x="235" y="93" class="pin-label">4</text>
+
+        <!-- Tab (exposed pad = GND) -->
+        <rect x="140" y="110" width="80" height="70" rx="2" fill="none" stroke="#6e7681" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="180" y="150" text-anchor="middle" fill="#6e7681" font-size="9">Exposed Pad</text>
+        <text x="180" y="162" text-anchor="middle" fill="#6e7681" font-size="8">= GND (thermal)</text>
+
+        <!-- External component annotations -->
+        <text x="180" y="215" text-anchor="middle" fill="#8b949e" font-size="8">─ External Components ─</text>
+        <text x="180" y="228" text-anchor="middle" fill="#3fb950" font-size="8">C12 10µF: VIN→GND (input) | C13 10µF: VOUT→GND (output)</text>
+        <text x="180" y="238" text-anchor="middle" fill="#3fb950" font-size="8">C14 100nF: VOUT→GND (output decoupling)</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Diode OR-ing Circuit -->
+  <div class="chip-container" style="margin-bottom:20px">
+    <div class="chip">
+      <div class="chip-title">Diode OR-ing – Buck + LDO + RPi Back-feed → 5V0 / 3V3 Rails</div>
+      <svg width="560" height="260" viewBox="0 0 560 260">
+        <!-- ===== 5V Rail OR-ing ===== -->
+        <text x="280" y="20" text-anchor="middle" fill="#ffa657" font-size="11" font-weight="700">5V0 Rail OR-ing</text>
+        <line x1="40" y1="25" x2="520" y2="25" stroke="#30363d" stroke-width="1"/>
+
+        <!-- Source 1: Buck output -->
+        <rect x="10" y="40" width="100" height="30" rx="4" fill="#1c2333" stroke="#ffa657" stroke-width="1"/>
+        <text x="60" y="54" text-anchor="middle" fill="#ffa657" font-size="9" font-weight="700">5V0_BUCK</text>
+        <text x="60" y="64" text-anchor="middle" fill="#8b949e" font-size="7">MP2307 Pin8</text>
+        <line x1="110" y1="55" x2="150" y2="55" stroke="#ffa657" stroke-width="1.5"/>
+
+        <!-- D11 Schottky -->
+        <polygon points="150,48 170,55 150,62" fill="#f0883e"/>
+        <line x1="170" y1="48" x2="170" y2="62" stroke="#f0883e" stroke-width="1.5"/>
+        <text x="160" y="75" text-anchor="middle" fill="#f0883e" font-size="8">D11 SS34</text>
+        <line x1="170" y1="55" x2="210" y2="55" stroke="#f0883e" stroke-width="1.5"/>
+
+        <!-- Source 2: RPi 5V back-feed -->
+        <rect x="10" y="90" width="100" height="30" rx="4" fill="#1c2333" stroke="#f0883e" stroke-width="1"/>
+        <text x="60" y="104" text-anchor="middle" fill="#f0883e" font-size="9" font-weight="700">RPi Pin 2</text>
+        <text x="60" y="114" text-anchor="middle" fill="#8b949e" font-size="7">5V from USB-C</text>
+        <line x1="110" y1="105" x2="150" y2="105" stroke="#f0883e" stroke-width="1.5"/>
+
+        <!-- D12 Schottky -->
+        <polygon points="150,98 170,105 150,112" fill="#f0883e"/>
+        <line x1="170" y1="98" x2="170" y2="112" stroke="#f0883e" stroke-width="1.5"/>
+        <text x="160" y="125" text-anchor="middle" fill="#f0883e" font-size="8">D12 SS34</text>
+        <line x1="170" y1="105" x2="210" y2="105" stroke="#f0883e" stroke-width="1.5"/>
+
+        <!-- OR junction -->
+        <line x1="210" y1="55" x2="210" y2="105" stroke="#f0883e" stroke-width="1.5"/>
+        <circle cx="210" cy="80" r="4" fill="#f0883e"/>
+        <line x1="210" y1="80" x2="250" y2="80" stroke="#f0883e" stroke-width="2"/>
+
+        <!-- 5V0 Rail -->
+        <rect x="250" y="65" width="120" height="30" rx="4" fill="#1c2333" stroke="#f0883e" stroke-width="2"/>
+        <text x="310" y="79" text-anchor="middle" fill="#f0883e" font-size="10" font-weight="700">5V0 Rail</text>
+        <text x="310" y="89" text-anchor="middle" fill="#8b949e" font-size="7">C5 10µF → GND</text>
+
+        <!-- 5V0 Rail outputs -->
+        <line x1="370" y1="75" x2="410" y2="75" stroke="#f0883e" stroke-width="1.5"/>
+        <text x="415" y="78" fill="#f0883e" font-size="8">→ 74HC245 VCC</text>
+        <line x1="370" y1="85" x2="410" y2="85" stroke="#f0883e" stroke-width="1.5"/>
+        <text x="415" y="88" fill="#f0883e" font-size="8">→ Servo 5V</text>
+        <line x1="370" y1="95" x2="410" y2="95" stroke="#f0883e" stroke-width="1.5"/>
+        <text x="415" y="98" fill="#f0883e" font-size="8">→ GPIO Pin 2,4</text>
+
+        <!-- ===== 3.3V Rail OR-ing ===== -->
+        <text x="280" y="145" text-anchor="middle" fill="#7ee787" font-size="11" font-weight="700">3V3 Rail OR-ing</text>
+        <line x1="40" y1="150" x2="520" y2="150" stroke="#30363d" stroke-width="1"/>
+
+        <!-- Source 1: LDO output -->
+        <rect x="10" y="165" width="100" height="30" rx="4" fill="#1c2333" stroke="#7ee787" stroke-width="1"/>
+        <text x="60" y="179" text-anchor="middle" fill="#7ee787" font-size="9" font-weight="700">3V3_REG</text>
+        <text x="60" y="189" text-anchor="middle" fill="#8b949e" font-size="7">AP2112 Pin4</text>
+        <line x1="110" y1="180" x2="150" y2="180" stroke="#7ee787" stroke-width="1.5"/>
+
+        <!-- D14 Schottky -->
+        <polygon points="150,173 170,180 150,187" fill="#3fb950"/>
+        <line x1="170" y1="173" x2="170" y2="187" stroke="#3fb950" stroke-width="1.5"/>
+        <text x="160" y="200" text-anchor="middle" fill="#3fb950" font-size="8">D14 SS34</text>
+        <line x1="170" y1="180" x2="210" y2="180" stroke="#3fb950" stroke-width="1.5"/>
+
+        <!-- Source 2: RPi 3.3V back-feed -->
+        <rect x="10" y="215" width="100" height="30" rx="4" fill="#1c2333" stroke="#3fb950" stroke-width="1"/>
+        <text x="60" y="229" text-anchor="middle" fill="#3fb950" font-size="9" font-weight="700">RPi Pin 1</text>
+        <text x="60" y="239" text-anchor="middle" fill="#8b949e" font-size="7">3.3V from Pi</text>
+        <line x1="110" y1="230" x2="150" y2="230" stroke="#3fb950" stroke-width="1.5"/>
+
+        <!-- D15 Schottky -->
+        <polygon points="150,223 170,230 150,247" fill="#3fb950"/>
+        <line x1="170" y1="223" x2="170" y2="247" stroke="#3fb950" stroke-width="1.5"/>
+        <text x="160" y="255" text-anchor="middle" fill="#3fb950" font-size="8">D15 SS34</text>
+        <line x1="170" y1="230" x2="210" y2="230" stroke="#3fb950" stroke-width="1.5"/>
+
+        <!-- OR junction -->
+        <line x1="210" y1="180" x2="210" y2="230" stroke="#3fb950" stroke-width="1.5"/>
+        <circle cx="210" cy="205" r="4" fill="#3fb950"/>
+        <line x1="210" y1="205" x2="250" y2="205" stroke="#3fb950" stroke-width="2"/>
+
+        <!-- 3V3 Rail -->
+        <rect x="250" y="190" width="120" height="30" rx="4" fill="#1c2333" stroke="#3fb950" stroke-width="2"/>
+        <text x="310" y="204" text-anchor="middle" fill="#3fb950" font-size="10" font-weight="700">3V3 Rail</text>
+        <text x="310" y="214" text-anchor="middle" fill="#8b949e" font-size="7">C6 10µF → GND</text>
+
+        <!-- 3V3 Rail outputs -->
+        <line x1="370" y1="200" x2="410" y2="200" stroke="#3fb950" stroke-width="1.5"/>
+        <text x="415" y="203" fill="#3fb950" font-size="8">→ ADS1015 DVDD</text>
+        <line x1="370" y1="210" x2="410" y2="210" stroke="#3fb950" stroke-width="1.5"/>
+        <text x="415" y="213" fill="#3fb950" font-size="8">→ ADS1015 AVDD</text>
+        <line x1="370" y1="220" x2="410" y2="220" stroke="#3fb950" stroke-width="1.5"/>
+        <text x="415" y="223" fill="#3fb950" font-size="8">→ GPIO Pin 1,17</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Power Flow Summary -->
+  <div class="chip-container">
+    <div class="chip">
+      <div class="chip-title">Power Flow Summary – Two Operating Modes</div>
+      <svg width="560" height="100" viewBox="0 0 560 100">
+        <!-- Mode 1: 12V present -->
+        <text x="280" y="15" text-anchor="middle" fill="#ffa657" font-size="10" font-weight="700">Mode 1: 12V DC jack plugged in</text>
+        <text x="10" y="35" fill="#8b949e" font-size="8">12V → MP2307 → D11 → 5V0 rail (wins over RPi back-feed)</text>
+        <text x="10" y="48" fill="#8b949e" font-size="8">12V → AP2112 → D14 → 3V3 rail (wins over RPi back-feed)</text>
+        <text x="10" y="61" fill="#8b949e" font-size="8">D13 blocks back-feed into buck/LDO when 12V present</text>
+
+        <!-- Mode 2: No 12V -->
+        <text x="280" y="80" text-anchor="middle" fill="#7ee787" font-size="10" font-weight="700">Mode 2: No 12V (RPi powered by native USB-C only)</text>
+        <text x="10" y="95" fill="#8b949e" font-size="8">RPi Pin 2 (5V) → D12 → 5V0 rail | RPi Pin 1 (3.3V) → D15 → 3V3 rail</text>
+      </svg>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ==================== 74HC245 TAB ==================== -->
+<div id="tab-levelshift" class="tab-content">
+<div class="section">
+  <h2>74HC245 Level Shifter – Pin-by-Pin (TSSOP-20)</h2>
+  <div class="chip-container">
+    <div class="chip">
+      <div class="chip-title">74HC245PW (U1) – TSSOP-20</div>
+      <svg width="340" height="320" viewBox="0 0 340 320">
+        <!-- Chip body -->
+        <rect x="120" y="30" width="100" height="260" rx="4" fill="#1c2333" stroke="#484f58" stroke-width="1.5"/>
+        <text x="170" y="165" text-anchor="middle" fill="#f0883e" font-size="11" font-weight="700">74HC245</text>
+        <text x="170" y="180" text-anchor="middle" fill="#8b949e" font-size="8">DIR=HIGH /CE=LOW</text>
+        <circle cx="130" cy="42" r="3" fill="#484f58"/> <!-- pin 1 dot -->
+
+        <!-- Left side pins (1-10) -->
+        <line x1="120" y1="55" x2="80" y2="55" stroke="#58a6ff" stroke-width="1.5"/>
+        <text x="75" y="58" text-anchor="end" class="pin-name net-signal">A1</text>
+        <text x="75" y="68" text-anchor="end" class="pin-label">Z STEP 3.3V</text>
+        <text x="115" y="58" text-anchor="end" class="pin-label">1</text>
+
+        <line x1="120" y1="82" x2="80" y2="82" stroke="#58a6ff" stroke-width="1.5"/>
+        <text x="75" y="85" text-anchor="end" class="pin-name net-signal">A2</text>
+        <text x="75" y="95" text-anchor="end" class="pin-label">Z DIR 3.3V</text>
+        <text x="115" y="85" text-anchor="end" class="pin-label">2</text>
+
+        <line x1="120" y1="109" x2="80" y2="109" stroke="#58a6ff" stroke-width="1.5"/>
+        <text x="75" y="112" text-anchor="end" class="pin-name net-signal">A3</text>
+        <text x="75" y="122" text-anchor="end" class="pin-label">Z EN 3.3V</text>
+        <text x="115" y="112" text-anchor="end" class="pin-label">3</text>
+
+        <line x1="120" y1="136" x2="80" y2="136" stroke="#58a6ff" stroke-width="1.5"/>
+        <text x="75" y="139" text-anchor="end" class="pin-name net-signal">A4</text>
+        <text x="75" y="149" text-anchor="end" class="pin-label">X STEP 3.3V</text>
+        <text x="115" y="139" text-anchor="end" class="pin-label">4</text>
+
+        <line x1="120" y1="163" x2="80" y2="163" stroke="#58a6ff" stroke-width="1.5"/>
+        <text x="75" y="166" text-anchor="end" class="pin-name net-signal">A5</text>
+        <text x="75" y="176" text-anchor="end" class="pin-label">X DIR 3.3V</text>
+        <text x="115" y="166" text-anchor="end" class="pin-label">5</text>
+
+        <line x1="120" y1="190" x2="80" y2="190" stroke="#58a6ff" stroke-width="1.5"/>
+        <text x="75" y="193" text-anchor="end" class="pin-name net-signal">A6</text>
+        <text x="75" y="203" text-anchor="end" class="pin-label">X EN 3.3V</text>
+        <text x="115" y="193" text-anchor="end" class="pin-label">6</text>
+
+        <line x1="120" y1="217" x2="80" y2="217" stroke="#484f58" stroke-width="1" stroke-dasharray="3,2"/>
+        <text x="75" y="220" text-anchor="end" class="pin-label">A7 (spare)</text>
+        <text x="115" y="220" text-anchor="end" class="pin-label">7</text>
+
+        <line x1="120" y1="244" x2="80" y2="244" stroke="#484f58" stroke-width="1" stroke-dasharray="3,2"/>
+        <text x="75" y="247" text-anchor="end" class="pin-label">A8 (spare)</text>
+        <text x="115" y="247" text-anchor="end" class="pin-label">8</text>
+
+        <line x1="120" y1="271" x2="80" y2="271" stroke="#6e7681" stroke-width="1.5"/>
+        <text x="75" y="274" text-anchor="end" class="pin-name net-gnd">GND</text>
+        <text x="115" y="274" text-anchor="end" class="pin-label">9</text>
+
+        <line x1="120" y1="298" x2="80" y2="298" stroke="#6e7681" stroke-width="1.5"/>
+        <text x="75" y="301" text-anchor="end" class="pin-name net-gnd">/CE</text>
+        <text x="75" y="311" text-anchor="end" class="pin-label">→ GND</text>
+        <text x="115" y="301" text-anchor="end" class="pin-label">10</text>
+
+        <!-- Right side pins (20-11) -->
+        <line x1="220" y1="55" x2="260" y2="55" stroke="#f0883e" stroke-width="1.5"/>
+        <text x="265" y="58" class="pin-name net-5v0">B1</text>
+        <text x="265" y="68" class="pin-label">Z STEP 5V</text>
+        <text x="225" y="58" class="pin-label">20</text>
+
+        <line x1="220" y1="82" x2="260" y2="82" stroke="#484f58" stroke-width="1" stroke-dasharray="3,2"/>
+        <text x="265" y="85" class="pin-label">B8 (spare)</text>
+        <text x="225" y="85" class="pin-label">19</text>
+
+        <line x1="220" y1="109" x2="260" y2="109" stroke="#484f58" stroke-width="1" stroke-dasharray="3,2"/>
+        <text x="265" y="112" class="pin-label">B7 (spare)</text>
+        <text x="225" y="112" class="pin-label">18</text>
+
+        <line x1="220" y1="136" x2="260" y2="136" stroke="#f0883e" stroke-width="1.5"/>
+        <text x="265" y="139" class="pin-name net-5v0">B6</text>
+        <text x="265" y="149" class="pin-label">X EN 5V</text>
+        <text x="225" y="139" class="pin-label">17</text>
+
+        <line x1="220" y1="163" x2="260" y2="163" stroke="#f0883e" stroke-width="1.5"/>
+        <text x="265" y="166" class="pin-name net-5v0">B5</text>
+        <text x="265" y="176" class="pin-label">X DIR 5V</text>
+        <text x="225" y="166" class="pin-label">16</text>
+
+        <line x1="220" y1="190" x2="260" y2="190" stroke="#f0883e" stroke-width="1.5"/>
+        <text x="265" y="193" class="pin-name net-5v0">B4</text>
+        <text x="265" y="203" class="pin-label">X STEP 5V</text>
+        <text x="225" y="193" class="pin-label">15</text>
+
+        <line x1="220" y1="217" x2="260" y2="217" stroke="#f0883e" stroke-width="1.5"/>
+        <text x="265" y="220" class="pin-name net-5v0">B3</text>
+        <text x="265" y="230" class="pin-label">Z EN 5V</text>
+        <text x="225" y="220" class="pin-label">14</text>
+
+        <line x1="220" y1="244" x2="260" y2="244" stroke="#f0883e" stroke-width="1.5"/>
+        <text x="265" y="247" class="pin-name net-5v0">B2</text>
+        <text x="265" y="257" class="pin-label">Z DIR 5V</text>
+        <text x="225" y="247" class="pin-label">13</text>
+
+        <line x1="220" y1="271" x2="260" y2="271" stroke="#f0883e" stroke-width="1.5"/>
+        <text x="265" y="274" class="pin-name net-5v0">B1</text>
+        <text x="265" y="284" class="pin-label">Z STEP 5V</text>
+        <text x="225" y="274" class="pin-label">12</text>
+
+        <line x1="220" y1="298" x2="260" y2="298" stroke="#f0883e" stroke-width="1.5"/>
+        <text x="265" y="301" class="pin-name net-5v0">DIR</text>
+        <text x="265" y="311" class="pin-label">→ 5V0</text>
+        <text x="225" y="301" class="pin-label">11</text>
+
+        <!-- VCC pin -->
+        <line x1="220" y1="55" x2="260" y2="55" stroke="#f0883e" stroke-width="1.5"/>
+        <text x="265" y="45" class="pin-name net-5v0">VCC</text>
+        <text x="265" y="55" class="pin-label">→ 5V0</text>
+
+        <!-- GPIO source labels -->
+        <text x="30" y="58" text-anchor="end" class="pin-label" fill="#58a6ff">GPIO 17</text>
+        <text x="30" y="85" text-anchor="end" class="pin-label" fill="#58a6ff">GPIO 27</text>
+        <text x="30" y="112" text-anchor="end" class="pin-label" fill="#58a6ff">GPIO 22</text>
+        <text x="30" y="139" text-anchor="end" class="pin-label" fill="#58a6ff">GPIO 24</text>
+        <text x="30" y="166" text-anchor="end" class="pin-label" fill="#58a6ff">GPIO 23</text>
+        <text x="30" y="193" text-anchor="end" class="pin-label" fill="#58a6ff">GPIO 25</text>
+
+        <!-- Output destination labels -->
+        <text x="310" y="58" class="pin-label" fill="#f0883e">→ J4-1</text>
+        <text x="310" y="247" class="pin-label" fill="#f0883e">→ J4-2</text>
+        <text x="310" y="220" class="pin-label" fill="#f0883e">→ J4-3</text>
+        <text x="310" y="193" class="pin-label" fill="#f0883e">→ J5-1</text>
+        <text x="310" y="166" class="pin-label" fill="#f0883e">→ J5-2</text>
+        <text x="310" y="139" class="pin-label" fill="#f0883e">→ J5-3</text>
+      </svg>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ==================== ADS1015 TAB ==================== -->
+<div id="tab-adc" class="tab-content">
+<div class="section">
+  <h2>ADS1015 ADC – Pin-by-Pin (VSSOP-10, 3×3 mm)</h2>
+  <div class="chip-container">
+    <div class="chip">
+      <div class="chip-title">ADS1015IDGSR (U2) – VSSOP-10</div>
+      <svg width="300" height="260" viewBox="0 0 300 260">
+        <!-- Chip body -->
+        <rect x="110" y="40" width="80" height="180" rx="4" fill="#1c2333" stroke="#484f58" stroke-width="1.5"/>
+        <text x="150" y="135" text-anchor="middle" fill="#f0883e" font-size="10" font-weight="700">ADS1015</text>
+        <text x="150" y="150" text-anchor="middle" fill="#8b949e" font-size="7">I2C 0x48</text>
+        <circle cx="118" cy="50" r="2.5" fill="#484f58"/>
+
+        <!-- Left pins (1-5) -->
+        <line x1="110" y1="65" x2="70" y2="65" stroke="#d2a8ff" stroke-width="1.5"/>
+        <text x="65" y="68" text-anchor="end" class="pin-name net-i2c">SDA</text>
+        <text x="65" y="78" text-anchor="end" class="pin-label">→ GPIO 2</text>
+        <text x="105" y="68" text-anchor="end" class="pin-label">1</text>
+
+        <line x1="110" y1="95" x2="70" y2="95" stroke="#d2a8ff" stroke-width="1.5"/>
+        <text x="65" y="98" text-anchor="end" class="pin-name net-i2c">SCL</text>
+        <text x="65" y="108" text-anchor="end" class="pin-label">→ GPIO 3</text>
+        <text x="105" y="98" text-anchor="end" class="pin-label">2</text>
+
+        <line x1="110" y1="125" x2="70" y2="125" stroke="#6e7681" stroke-width="1.5"/>
+        <text x="65" y="128" text-anchor="end" class="pin-name net-gnd">A0</text>
+        <text x="65" y="138" text-anchor="end" class="pin-label">→ GND</text>
+        <text x="105" y="128" text-anchor="end" class="pin-label">3</text>
+
+        <line x1="110" y1="155" x2="70" y2="155" stroke="#6e7681" stroke-width="1.5"/>
+        <text x="65" y="158" text-anchor="end" class="pin-name net-gnd">GND</text>
+        <text x="105" y="158" text-anchor="end" class="pin-label">4</text>
+
+        <line x1="110" y1="185" x2="70" y2="185" stroke="#3fb950" stroke-width="1.5"/>
+        <text x="65" y="188" text-anchor="end" class="pin-name net-3v3">DVDD</text>
+        <text x="65" y="198" text-anchor="end" class="pin-label">→ 3V3</text>
+        <text x="105" y="188" text-anchor="end" class="pin-label">5</text>
+
+        <!-- Right pins (6-10) -->
+        <line x1="190" y1="185" x2="230" y2="185" stroke="#6e7681" stroke-width="1.5"/>
+        <text x="235" y="188" class="pin-name net-gnd">DVSS</text>
+        <text x="235" y="198" class="pin-label">→ GND</text>
+        <text x="195" y="188" class="pin-label">6</text>
+
+        <line x1="190" y1="155" x2="230" y2="155" stroke="#79c0ff" stroke-width="1.5"/>
+        <text x="235" y="158" class="pin-name net-input">AIN0</text>
+        <text x="235" y="168" class="pin-label">← Pot wiper</text>
+        <text x="195" y="158" class="pin-label">7</text>
+
+        <line x1="190" y1="125" x2="230" y2="125" stroke="#484f58" stroke-width="1" stroke-dasharray="3,2"/>
+        <text x="235" y="128" class="pin-label">AIN1 (NC)</text>
+        <text x="195" y="128" class="pin-label">8</text>
+
+        <line x1="190" y1="95" x2="230" y2="95" stroke="#3fb950" stroke-width="1.5"/>
+        <text x="235" y="98" class="pin-name net-3v3">AVDD</text>
+        <text x="235" y="108" class="pin-label">→ 3V3</text>
+        <text x="195" y="98" class="pin-label">9</text>
+
+        <line x1="190" y1="65" x2="230" y2="65" stroke="#6e7681" stroke-width="1.5"/>
+        <text x="235" y="68" class="pin-name net-gnd">AVSS</text>
+        <text x="235" y="78" class="pin-label">→ GND</text>
+        <text x="195" y="68" class="pin-label">10</text>
+
+        <!-- Capacitor annotations -->
+        <text x="150" y="230" text-anchor="middle" fill="#8b949e" font-size="8">C2 100nF: AVDD↔AVSS | C3 100nF: DVDD↔DVSS | C4 10µF: 3V3↔GND</text>
+        <text x="150" y="245" text-anchor="middle" fill="#8b949e" font-size="8">R9 10kΩ series on AIN0 from J7 pot connector</text>
+      </svg>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ==================== GPIO MAP TAB ==================== -->
+<div id="tab-gpio" class="tab-content">
+<div class="section">
+  <h2>Raspberry Pi 40-Pin GPIO – Complete Pin Map</h2>
+  <div class="chip-container">
+    <div class="chip">
+      <div class="chip-title">RPi GPIO Header (J1) – 2×20 Male</div>
+      <svg width="380" height="520" viewBox="0 0 380 520">
+        <!-- Header body -->
+        <rect x="130" y="10" width="120" height="500" rx="4" fill="#1c2333" stroke="#484f58" stroke-width="1.5"/>
+        <text x="190" y="260" text-anchor="middle" fill="#8b949e" font-size="9">RPi 40-Pin GPIO</text>
+
+        <!-- Left row (odd pins 1-39) -->
+        <g id="left-row">
+          <!-- Pin 1: 3.3V -->
+          <line x1="130" y1="35" x2="90" y2="35" stroke="#3fb950" stroke-width="2"/>
+          <text x="85" y="38" text-anchor="end" class="pin-name net-3v3">3.3V</text>
+          <text x="85" y="48" text-anchor="end" class="pin-label">→ D15 → 3V3</text>
+          <text x="125" y="38" text-anchor="end" class="pin-label">1</text>
+
+          <!-- Pin 3: SDA -->
+          <line x1="130" y1="65" x2="90" y2="65" stroke="#d2a8ff" stroke-width="2"/>
+          <text x="85" y="68" text-anchor="end" class="pin-name net-i2c">SDA</text>
+          <text x="85" y="78" text-anchor="end" class="pin-label">→ ADS1015</text>
+          <text x="125" y="68" text-anchor="end" class="pin-label">3</text>
+
+          <!-- Pin 5: SCL -->
+          <line x1="130" y1="95" x2="90" y2="95" stroke="#d2a8ff" stroke-width="2"/>
+          <text x="85" y="98" text-anchor="end" class="pin-name net-i2c">SCL</text>
+          <text x="85" y="108" text-anchor="end" class="pin-label">→ ADS1015</text>
+          <text x="125" y="98" text-anchor="end" class="pin-label">5</text>
+
+          <!-- Pin 7: Half-nut -->
+          <line x1="130" y1="125" x2="90" y2="125" stroke="#79c0ff" stroke-width="2"/>
+          <text x="85" y="128" text-anchor="end" class="pin-name net-input">GPIO 4</text>
+          <text x="85" y="138" text-anchor="end" class="pin-label">→ Half-nut</text>
+          <text x="125" y="128" text-anchor="end" class="pin-label">7</text>
+
+          <!-- Pin 11: Z STEP -->
+          <line x1="130" y1="155" x2="90" y2="155" stroke="#58a6ff" stroke-width="2"/>
+          <text x="85" y="158" text-anchor="end" class="pin-name net-signal">GPIO 17</text>
+          <text x="85" y="168" text-anchor="end" class="pin-label">→ 74HC245 A1</text>
+          <text x="125" y="158" text-anchor="end" class="pin-label">11</text>
+
+          <!-- Pin 13: Z DIR -->
+          <line x1="130" y1="185" x2="90" y2="185" stroke="#58a6ff" stroke-width="2"/>
+          <text x="85" y="188" text-anchor="end" class="pin-name net-signal">GPIO 27</text>
+          <text x="85" y="198" text-anchor="end" class="pin-label">→ 74HC245 A2</text>
+          <text x="125" y="188" text-anchor="end" class="pin-label">13</text>
+
+          <!-- Pin 15: Z EN -->
+          <line x1="130" y1="215" x2="90" y2="215" stroke="#58a6ff" stroke-width="2"/>
+          <text x="85" y="218" text-anchor="end" class="pin-name net-signal">GPIO 22</text>
+          <text x="85" y="228" text-anchor="end" class="pin-label">→ 74HC245 A3</text>
+          <text x="125" y="218" text-anchor="end" class="pin-label">15</text>
+
+          <!-- Pin 17: 3.3V -->
+          <line x1="130" y1="245" x2="90" y2="245" stroke="#3fb950" stroke-width="2"/>
+          <text x="85" y="248" text-anchor="end" class="pin-name net-3v3">3.3V</text>
+          <text x="85" y="258" text-anchor="end" class="pin-label">→ D15 → 3V3</text>
+          <text x="125" y="248" text-anchor="end" class="pin-label">17</text>
+
+          <!-- Pin 19: X ENC A -->
+          <line x1="130" y1="275" x2="90" y2="275" stroke="#79c0ff" stroke-width="2"/>
+          <text x="85" y="278" text-anchor="end" class="pin-name net-input">GPIO 13</text>
+          <text x="85" y="288" text-anchor="end" class="pin-label">→ X ENC A</text>
+          <text x="125" y="278" text-anchor="end" class="pin-label">19</text>
+
+          <!-- Pin 21: BTN1 -->
+          <line x1="130" y1="305" x2="90" y2="305" stroke="#79c0ff" stroke-width="2"/>
+          <text x="85" y="308" text-anchor="end" class="pin-name net-input">GPIO 26</text>
+          <text x="85" y="318" text-anchor="end" class="pin-label">→ BTN1</text>
+          <text x="125" y="308" text-anchor="end" class="pin-label">21</text>
+
+          <!-- Pin 23: LIM X- -->
+          <line x1="130" y1="335" x2="90" y2="335" stroke="#79c0ff" stroke-width="2"/>
+          <text x="85" y="338" text-anchor="end" class="pin-name net-input">GPIO 11</text>
+          <text x="85" y="348" text-anchor="end" class="pin-label">→ LIM X−</text>
+          <text x="125" y="338" text-anchor="end" class="pin-label">23</text>
+
+          <!-- Pin 26: LIM Z- -->
+          <line x1="130" y1="365" x2="90" y2="365" stroke="#79c0ff" stroke-width="2"/>
+          <text x="85" y="368" text-anchor="end" class="pin-name net-input">GPIO 7</text>
+          <text x="85" y="378" text-anchor="end" class="pin-label">→ LIM Z−</text>
+          <text x="125" y="368" text-anchor="end" class="pin-label">26</text>
+
+          <!-- Pin 29: Z ENC A -->
+          <line x1="130" y1="395" x2="90" y2="395" stroke="#79c0ff" stroke-width="2"/>
+          <text x="85" y="398" text-anchor="end" class="pin-name net-input">GPIO 5</text>
+          <text x="85" y="408" text-anchor="end" class="pin-label">→ Z ENC A</text>
+          <text x="125" y="398" text-anchor="end" class="pin-label">29</text>
+
+          <!-- Pin 31: Z ENC B -->
+          <line x1="130" y1="425" x2="90" y2="425" stroke="#79c0ff" stroke-width="2"/>
+          <text x="85" y="428" text-anchor="end" class="pin-name net-input">GPIO 6</text>
+          <text x="85" y="438" text-anchor="end" class="pin-label">→ Z ENC B</text>
+          <text x="125" y="428" text-anchor="end" class="pin-label">31</text>
+
+          <!-- Pin 32: Spindle -->
+          <line x1="130" y1="455" x2="90" y2="455" stroke="#79c0ff" stroke-width="2"/>
+          <text x="85" y="458" text-anchor="end" class="pin-name net-input">GPIO 12</text>
+          <text x="85" y="468" text-anchor="end" class="pin-label">→ Spindle</text>
+          <text x="125" y="458" text-anchor="end" class="pin-label">32</text>
+
+          <!-- Pin 33: X ENC A -->
+          <line x1="130" y1="485" x2="90" y2="485" stroke="#79c0ff" stroke-width="2"/>
+          <text x="85" y="488" text-anchor="end" class="pin-name net-input">GPIO 13</text>
+          <text x="85" y="498" text-anchor="end" class="pin-label">→ X ENC A</text>
+          <text x="125" y="488" text-anchor="end" class="pin-label">33</text>
+        </g>
+
+        <!-- Right row (even pins 2-40) -->
+        <g id="right-row">
+          <!-- Pin 2: 5V -->
+          <line x1="250" y1="35" x2="290" y2="35" stroke="#f0883e" stroke-width="2"/>
+          <text x="295" y="38" class="pin-name net-5v0">5V</text>
+          <text x="295" y="48" class="pin-label">→ D12 → 5V0</text>
+          <text x="255" y="38" class="pin-label">2</text>
+
+          <!-- Pin 4: 5V -->
+          <line x1="250" y1="65" x2="290" y2="65" stroke="#f0883e" stroke-width="2"/>
+          <text x="295" y="68" class="pin-name net-5v0">5V</text>
+          <text x="295" y="78" class="pin-label">→ 5V0</text>
+          <text x="255" y="68" class="pin-label">4</text>
+
+          <!-- Pin 6: GND -->
+          <line x1="250" y1="95" x2="290" y2="95" stroke="#6e7681" stroke-width="2"/>
+          <text x="295" y="98" class="pin-name net-gnd">GND</text>
+          <text x="255" y="98" class="pin-label">6</text>
+
+          <!-- Pin 8: TXD -->
+          <line x1="250" y1="125" x2="290" y2="125" stroke="#484f58" stroke-width="1" stroke-dasharray="3,2"/>
+          <text x="295" y="128" class="pin-label">TXD (NC)</text>
+          <text x="255" y="128" class="pin-label">8</text>
+
+          <!-- Pin 9: GND -->
+          <line x1="250" y1="155" x2="290" y2="155" stroke="#6e7681" stroke-width="2"/>
+          <text x="295" y="158" class="pin-name net-gnd">GND</text>
+          <text x="255" y="158" class="pin-label">9</text>
+
+          <!-- Pin 14: GND -->
+          <line x1="250" y1="185" x2="290" y2="185" stroke="#6e7681" stroke-width="2"/>
+          <text x="295" y="188" class="pin-name net-gnd">GND</text>
+          <text x="255" y="188" class="pin-label">14</text>
+
+          <!-- Pin 16: X DIR -->
+          <line x1="250" y1="215" x2="290" y2="215" stroke="#58a6ff" stroke-width="2"/>
+          <text x="295" y="218" class="pin-name net-signal">GPIO 23</text>
+          <text x="295" y="228" class="pin-label">→ 74HC245 A5</text>
+          <text x="255" y="218" class="pin-label">16</text>
+
+          <!-- Pin 18: X STEP -->
+          <line x1="250" y1="245" x2="290" y2="245" stroke="#58a6ff" stroke-width="2"/>
+          <text x="295" y="248" class="pin-name net-signal">GPIO 24</text>
+          <text x="295" y="258" class="pin-label">→ 74HC245 A4</text>
+          <text x="255" y="248" class="pin-label">18</text>
+
+          <!-- Pin 20: GND -->
+          <line x1="250" y1="275" x2="290" y2="275" stroke="#6e7681" stroke-width="2"/>
+          <text x="295" y="278" class="pin-name net-gnd">GND</text>
+          <text x="255" y="278" class="pin-label">20</text>
+
+          <!-- Pin 22: X EN -->
+          <line x1="250" y1="305" x2="290" y2="305" stroke="#58a6ff" stroke-width="2"/>
+          <text x="295" y="308" class="pin-name net-signal">GPIO 25</text>
+          <text x="295" y="318" class="pin-label">→ 74HC245 A6</text>
+          <text x="255" y="308" class="pin-label">22</text>
+
+          <!-- Pin 24: LIM X+ -->
+          <line x1="250" y1="335" x2="290" y2="335" stroke="#79c0ff" stroke-width="2"/>
+          <text x="295" y="338" class="pin-name net-input">GPIO 8</text>
+          <text x="295" y="348" class="pin-label">→ LIM X+</text>
+          <text x="255" y="338" class="pin-label">24</text>
+
+          <!-- Pin 25: GND -->
+          <line x1="250" y1="365" x2="290" y2="365" stroke="#6e7681" stroke-width="2"/>
+          <text x="295" y="368" class="pin-name net-gnd">GND</text>
+          <text x="255" y="368" class="pin-label">25</text>
+
+          <!-- Pin 30: GND -->
+          <line x1="250" y1="395" x2="290" y2="395" stroke="#6e7681" stroke-width="2"/>
+          <text x="295" y="398" class="pin-name net-gnd">GND</text>
+          <text x="255" y="398" class="pin-label">30</text>
+
+          <!-- Pin 34: GND -->
+          <line x1="250" y1="425" x2="290" y2="425" stroke="#6e7681" stroke-width="2"/>
+          <text x="295" y="428" class="pin-name net-gnd">GND</text>
+          <text x="255" y="428" class="pin-label">34</text>
+
+          <!-- Pin 35: X ENC B -->
+          <line x1="250" y1="455" x2="290" y2="455" stroke="#79c0ff" stroke-width="2"/>
+          <text x="295" y="458" class="pin-name net-input">GPIO 19</text>
+          <text x="295" y="468" class="pin-label">→ X ENC B</text>
+          <text x="255" y="458" class="pin-label">35</text>
+
+          <!-- Pin 36: LIM Z+ -->
+          <line x1="250" y1="485" x2="290" y2="485" stroke="#79c0ff" stroke-width="2"/>
+          <text x="295" y="488" class="pin-name net-input">GPIO 16</text>
+          <text x="295" y="498" class="pin-label">→ LIM Z+</text>
+          <text x="255" y="488" class="pin-label">36</text>
+
+          <!-- Pin 37: BTN1 -->
+          <line x1="250" y1="505" x2="290" y2="505" stroke="#79c0ff" stroke-width="1.5"/>
+          <text x="295" y="508" class="pin-label">GPIO 26</text>
+          <text x="255" y="508" class="pin-label">37</text>
+
+          <!-- Pin 38: BTN2 -->
+          <line x1="250" y1="515" x2="290" y2="515" stroke="#79c0ff" stroke-width="1.5"/>
+          <text x="295" y="518" class="pin-label">GPIO 20</text>
+          <text x="255" y="518" class="pin-label">38</text>
+
+          <!-- Pin 39: GND -->
+          <line x1="250" y1="525" x2="290" y2="525" stroke="#6e7681" stroke-width="1.5"/>
+          <text x="295" y="528" class="pin-label">GND</text>
+          <text x="255" y="528" class="pin-label">39</text>
+
+          <!-- Pin 40: BTN3 -->
+          <line x1="250" y1="535" x2="290" y2="535" stroke="#79c0ff" stroke-width="1.5"/>
+          <text x="295" y="538" class="pin-label">GPIO 21</text>
+          <text x="255" y="538" class="pin-label">40</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ==================== CONNECTORS TAB ==================== -->
+<div id="tab-connectors" class="tab-content">
+<div class="section">
+  <h2>All External Connectors – Pinout Reference</h2>
+  <div class="connector-grid">
+
+    <div class="connector-card">
+      <h3>J2 – Z Encoder (JST PH 6-pin)</h3>
+      <table>
+        <tr><td>1</td><td style="color:#3fb950">3V3</td><td>VCC</td></tr>
+        <tr><td>2</td><td style="color:#6e7681">GND</td><td>Ground</td></tr>
+        <tr><td>3</td><td style="color:#79c0ff">Z_ENC_A</td><td>→ GPIO 5</td></tr>
+        <tr><td>4</td><td style="color:#79c0ff">Z_ENC_B</td><td>→ GPIO 6</td></tr>
+        <tr><td>5</td><td>—</td><td>INDEX (NC)</td></tr>
+        <tr><td>6</td><td>—</td><td>NC</td></tr>
+      </table>
+    </div>
+
+    <div class="connector-card">
+      <h3>J3 – X Encoder (JST PH 6-pin)</h3>
+      <table>
+        <tr><td>1</td><td style="color:#3fb950">3V3</td><td>VCC</td></tr>
+        <tr><td>2</td><td style="color:#6e7681">GND</td><td>Ground</td></tr>
+        <tr><td>3</td><td style="color:#79c0ff">X_ENC_A</td><td>→ GPIO 13</td></tr>
+        <tr><td>4</td><td style="color:#79c0ff">X_ENC_B</td><td>→ GPIO 19</td></tr>
+        <tr><td>5</td><td>—</td><td>INDEX (NC)</td></tr>
+        <tr><td>6</td><td>—</td><td>NC</td></tr>
+      </table>
+    </div>
+
+    <div class="connector-card">
+      <h3>J4 – Z Servo (Molex 8-pin)</h3>
+      <table>
+        <tr><td>1</td><td style="color:#f0883e">Z_STEP_5V</td><td>← 74HC245 B1 +100Ω</td></tr>
+        <tr><td>2</td><td style="color:#f0883e">Z_DIR_5V</td><td>← 74HC245 B2 +100Ω</td></tr>
+        <tr><td>3</td><td style="color:#f0883e">Z_EN_5V</td><td>← 74HC245 B3</td></tr>
+        <tr><td>4</td><td>—</td><td>HLFB (NC)</td></tr>
+        <tr><td>5</td><td style="color:#6e7681">GND</td><td>Signal ground</td></tr>
+        <tr><td>6</td><td style="color:#f0883e">5V0</td><td>Logic power</td></tr>
+        <tr><td>7</td><td>—</td><td>HV+ (external 70V)</td></tr>
+        <tr><td>8</td><td>—</td><td>HV- (external 70V)</td></tr>
+      </table>
+    </div>
+
+    <div class="connector-card">
+      <h3>J5 – X Servo (Molex 8-pin)</h3>
+      <table>
+        <tr><td>1</td><td style="color:#f0883e">X_STEP_5V</td><td>← 74HC245 B4 +100Ω</td></tr>
+        <tr><td>2</td><td style="color:#f0883e">X_DIR_5V</td><td>← 74HC245 B5 +100Ω</td></tr>
+        <tr><td>3</td><td style="color:#f0883e">X_EN_5V</td><td>← 74HC245 B6</td></tr>
+        <tr><td>4</td><td>—</td><td>HLFB (NC)</td></tr>
+        <tr><td>5</td><td style="color:#6e7681">GND</td><td>Signal ground</td></tr>
+        <tr><td>6</td><td style="color:#f0883e">5V0</td><td>Logic power</td></tr>
+        <tr><td>7</td><td>—</td><td>HV+ (external 70V)</td></tr>
+        <tr><td>8</td><td>—</td><td>HV- (external 70V)</td></tr>
+      </table>
+    </div>
+
+    <div class="connector-card">
+      <h3>J6 – Spindle Index (JST PH 3-pin)</h3>
+      <table>
+        <tr><td>1</td><td style="color:#f0883e">5V0</td><td>→ AutoTech C3 +5V</td></tr>
+        <tr><td>2</td><td style="color:#6e7681">GND</td><td>Common ground</td></tr>
+        <tr><td>3</td><td style="color:#79c0ff">SPINDLE_RAW</td><td>→ 10k/20k divider → GPIO 12</td></tr>
+      </table>
+    </div>
+
+    <div class="connector-card">
+      <h3>J7 – Potentiometer (JST PH 3-pin)</h3>
+      <table>
+        <tr><td>1</td><td style="color:#f0883e">5V0</td><td>Pot end A (5V)</td></tr>
+        <tr><td>2</td><td style="color:#79c0ff">POT_WIPER</td><td>→ 10kΩ → ADS1015 AIN0</td></tr>
+        <tr><td>3</td><td style="color:#6e7681">GND</td><td>Pot end B</td></tr>
+      </table>
+    </div>
+
+    <div class="connector-card">
+      <h3>J8/J9/J10 – Buttons (2-pin screw)</h3>
+      <table>
+        <tr><td>1</td><td style="color:#79c0ff">BTN_IN</td><td>→ GPIO + 10kΩ pull-up 3V3</td></tr>
+        <tr><td>2</td><td style="color:#6e7681">GND</td><td>Switch closes to GND</td></tr>
+      </table>
+      <div style="font-size:10px;color:#8b949e;margin-top:4px">J8→GPIO26 | J9→GPIO20 | J10→GPIO21</div>
+    </div>
+
+    <div class="connector-card">
+      <h3>J11 – Half-Nut (2-pin screw)</h3>
+      <table>
+        <tr><td>1</td><td style="color:#79c0ff">HALF_NUT_IN</td><td>→ GPIO 4 + 10kΩ pull-down</td></tr>
+        <tr><td>2</td><td style="color:#6e7681">GND</td><td>Ground</td></tr>
+      </table>
+    </div>
+
+    <div class="connector-card">
+      <h3>J12–J15 – Limit Switches (2-pin screw)</h3>
+      <table>
+        <tr><td>1</td><td style="color:#79c0ff">LIM_IN</td><td>→ GPIO + 10kΩ pull-up 3V3</td></tr>
+        <tr><td>2</td><td style="color:#6e7681">GND</td><td>NC switch to GND</td></tr>
+      </table>
+      <div style="font-size:10px;color:#8b949e;margin-top:4px">J12→GPIO16(Z+) | J13→GPIO7(Z-) | J14→GPIO8(X+) | J15→GPIO11(X-)</div>
+    </div>
+
+    <div class="connector-card">
+      <h3>J16 – E-Stop (4-pin screw)</h3>
+      <table>
+        <tr><td>1</td><td style="color:#ff7b72">ESTOP_NC</td><td>Hard-wired to ENABLE traces</td></tr>
+        <tr><td>2</td><td style="color:#79c0ff">ESTOP_NO</td><td>→ GPIO + 10kΩ pull-up</td></tr>
+        <tr><td>3</td><td>ESTOP_COM</td><td>Common terminal</td></tr>
+        <tr><td>4</td><td style="color:#6e7681">GND</td><td>Ground</td></tr>
+      </table>
+    </div>
+
+    <div class="connector-card">
+      <h3>J17 – 12V DC Input (Barrel Jack)</h3>
+      <table>
+        <tr><td>Tip</td><td style="color:#ff7b72">VIN_12V</td><td>→ Fuse → Buck + LDO</td></tr>
+        <tr><td>Sleeve</td><td style="color:#6e7681">GND</td><td>Common ground</td></tr>
+      </table>
+      <div style="font-size:10px;color:#8b949e;margin-top:4px">5.5mm × 2.1mm, center-positive</div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<script>
+function showTab(name) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+
+</body>
+</html>

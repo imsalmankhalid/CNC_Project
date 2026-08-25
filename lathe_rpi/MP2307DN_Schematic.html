@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MP2307DN – 12V to 5V Buck Regulator Schematic</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #f5f5f5;
+    color: #333;
+    padding: 20px;
+  }
+  h1 { text-align: center; font-size: 20px; color: #1a73e8; margin-bottom: 4px; }
+  .subtitle { text-align: center; font-size: 12px; color: #666; margin-bottom: 20px; }
+
+  .canvas {
+    position: relative;
+    width: 900px;
+    height: 700px;
+    margin: 0 auto;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    overflow: hidden;
+  }
+  .canvas::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px);
+    background-size: 20px 20px;
+    pointer-events: none;
+  }
+
+  .wires {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .wires line, .wires polyline { stroke-width: 1.8; fill: none; }
+
+  .comp {
+    position: absolute;
+    z-index: 10;
+    text-align: center;
+  }
+  .comp-body {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 2px solid;
+    background: #fff;
+    display: inline-block;
+  }
+  .comp-desig { font-size: 12px; font-weight: 700; display: block; }
+  .comp-type { font-size: 9px; color: #666; display: block; margin-top: 2px; }
+  .comp-pins {
+    display: flex; flex-direction: column; gap: 2px;
+    margin-top: 6px; font-size: 8px; color: #555;
+    text-align: left; padding: 0 6px;
+  }
+  .comp-pin { display: flex; justify-content: space-between; gap: 8px; }
+  .pin-num { color: #999; min-width: 50px; }
+  .pin-net { font-weight: 600; }
+
+  .comp-ic .comp-body { border-color: #1a73e8; background: #e8f0fe; }
+  .comp-ic .comp-desig { color: #1a73e8; }
+  .comp-passive .comp-body { border-color: #999; background: #fafafa; }
+  .comp-passive .comp-desig { color: #555; }
+  .comp-diode .comp-body { border-color: #ea4335; background: #fce8e6; }
+  .comp-diode .comp-desig { color: #c5221f; }
+  .comp-ind .comp-body { border-color: #f9ab00; background: #fef7e0; }
+  .comp-ind .comp-desig { color: #e37400; }
+  .comp-term .comp-body { border-color: #34a853; background: #e6f4ea; }
+  .comp-term .comp-desig { color: #137333; }
+
+  .net-label {
+    position: absolute;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 3px;
+    background: #fff;
+    border: 1px solid #ddd;
+    z-index: 5;
+    white-space: nowrap;
+  }
+
+  .info-box {
+    position: absolute;
+    background: #f0f6ff;
+    border: 1px solid #b3d4fc;
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 10px;
+    line-height: 1.6;
+    z-index: 20;
+    max-width: 280px;
+  }
+  .info-box strong { color: #1a73e8; }
+  .info-box code {
+    background: #e8eaed;
+    padding: 1px 4px;
+    border-radius: 2px;
+    font-size: 9px;
+  }
+
+  .legend {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 9px;
+    z-index: 20;
+  }
+  .legend-title { font-weight: 700; margin-bottom: 4px; font-size: 10px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; margin: 2px 0; }
+  .legend-dot { width: 14px; height: 3px; border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<h1>MP2307DN – 12V to 5V Fixed Buck Regulator</h1>
+<p class="subtitle">Complete pin-by-pin schematic with all external components · SOP-8 package · 3A output</p>
+
+<div class="canvas">
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- WIRES -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <svg class="wires" viewBox="0 0 900 700">
+
+    <!-- ── VIN_12V input bus ── -->
+    <line x1="80" y1="200" x2="160" y2="200" stroke="#d93025" stroke-width="2.5"/>
+    <line x1="160" y1="200" x2="160" y2="280" stroke="#d93025" stroke-width="2.5"/>
+    <line x1="160" y1="280" x2="280" y2="280" stroke="#d93025" stroke-width="2.5"/>
+    <!-- VIN to C1 -->
+    <line x1="160" y1="240" x2="160" y2="340" stroke="#d93025"/>
+    <line x1="160" y1="360" x2="160" y2="420" stroke="#666"/>
+
+    <!-- ── MP2307 Pin 1 VIN ── -->
+    <line x1="280" y1="280" x2="340" y2="280" stroke="#d93025" stroke-width="2"/>
+
+    <!-- ── MP2307 Pin 2 EN ── -->
+    <line x1="340" y1="310" x2="300" y2="310" stroke="#34a853"/>
+    <line x1="300" y1="310" x2="300" y2="380" stroke="#34a853"/>
+    <!-- EN resistor -->
+    <line x1="300" y1="380" x2="300" y2="420" stroke="#999"/>
+    <line x1="300" y1="440" x2="300" y2="480" stroke="#999"/>
+    <line x1="300" y1="480" x2="300" y2="520" stroke="#666"/>
+
+    <!-- ── MP2307 Pin 3 SW ── -->
+    <line x1="420" y1="280" x2="480" y2="280" stroke="#f9ab00" stroke-width="2"/>
+
+    <!-- SW node to L1 -->
+    <line x1="480" y1="280" x2="540" y2="280" stroke="#f9ab00" stroke-width="2"/>
+
+    <!-- SW node to C11 (bootstrap) -->
+    <line x1="480" y1="280" x2="480" y2="340" stroke="#f9ab00"/>
+    <line x1="480" y1="360" x2="480" y2="400" stroke="#f9ab00"/>
+
+    <!-- SW node to R24 (RT/CT) -->
+    <line x1="480" y1="280" x2="480" y2="440" stroke="#f9ab00"/>
+    <line x1="480" y1="460" x2="480" y2="500" stroke="#999"/>
+    <line x1="480" y1="520" x2="480" y2="560" stroke="#666"/>
+
+    <!-- ── L1 to D9 / VOUT ── -->
+    <line x1="600" y1="280" x2="660" y2="280" stroke="#f9ab00" stroke-width="2"/>
+
+    <!-- D9 anode to L1, cathode to VOUT -->
+    <line x1="660" y1="280" x2="720" y2="280" stroke="#f9ab00" stroke-width="2"/>
+    <line x1="760" y1="280" x2="820" y2="280" stroke="#f0883e" stroke-width="2.5"/>
+
+    <!-- ── 5V0_BUCK output bus ── -->
+    <line x1="820" y1="280" x2="820" y2="200" stroke="#f0883e" stroke-width="2.5"/>
+    <line x1="820" y1="200" x2="860" y2="200" stroke="#f0883e" stroke-width="2.5"/>
+
+    <!-- VOUT to C9 -->
+    <line x1="820" y1="240" x2="780" y2="240" stroke="#f0883e"/>
+    <line x1="780" y1="240" x2="780" y2="340" stroke="#f0883e"/>
+    <line x1="780" y1="360" x2="780" y2="420" stroke="#666"/>
+
+    <!-- VOUT to C10 -->
+    <line x1="820" y1="260" x2="820" y2="340" stroke="#f0883e"/>
+    <line x1="820" y1="360" x2="820" y2="420" stroke="#666"/>
+
+    <!-- ── MP2307 Pin 5 BOOT ── -->
+    <line x1="420" y1="340" x2="480" y2="340" stroke="#f9ab00"/>
+
+    <!-- ── MP2307 Pin 6 RT/CT ── -->
+    <line x1="420" y1="370" x2="480" y2="370" stroke="#999"/>
+
+    <!-- ── MP2307 Pin 7 FB → GND (fixed 5V) ── -->
+    <line x1="420" y1="400" x2="460" y2="400" stroke="#666"/>
+    <line x1="460" y1="400" x2="460" y2="520" stroke="#666"/>
+
+    <!-- ── MP2307 Pin 4,8 GND ── -->
+    <line x1="340" y1="430" x2="340" y2="520" stroke="#666"/>
+    <line x1="420" y1="430" x2="420" y2="520" stroke="#666"/>
+
+    <!-- ── GND bus ── -->
+    <line x1="120" y1="520" x2="520" y2="520" stroke="#666" stroke-width="3"/>
+    <line x1="740" y1="420" x2="860" y2="420" stroke="#666" stroke-width="3"/>
+    <line x1="740" y1="420" x2="740" y2="520" stroke="#666" stroke-width="3"/>
+    <line x1="520" y1="520" x2="740" y2="520" stroke="#666" stroke-width="3"/>
+
+    <!-- ── 3V3 input (for EN) ── -->
+    <line x1="200" y1="140" x2="300" y2="140" stroke="#34a853" stroke-width="2"/>
+    <line x1="300" y1="140" x2="300" y2="200" stroke="#34a853"/>
+  </svg>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- NET LABELS -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="net-label" style="left:80px; top:185px; color:#d93025; border-color:#d93025;">VIN_12V (12V)</div>
+  <div class="net-label" style="left:485px; top:265px; color:#f9ab00; border-color:#f9ab00;">SW (switch node)</div>
+  <div class="net-label" style="left:825px; top:185px; color:#f0883e; border-color:#f0883e;">5V0_BUCK (5V out)</div>
+  <div class="net-label" style="left:120px; top:505px; color:#666; border-color:#666;">GND</div>
+  <div class="net-label" style="left:200px; top:125px; color:#34a853; border-color:#34a853;">3V3 (enable)</div>
+  <div class="net-label" style="left:485px; top:395px; color:#f9ab00; border-color:#f9ab00;">BOOT</div>
+  <div class="net-label" style="left:485px; top:355px; color:#999; border-color:#999;">RT/CT → GND</div>
+  <div class="net-label" style="left:425px; top:385px; color:#666; border-color:#666;">FB → GND (fixed 5V)</div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- COMPONENTS -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+
+  <!-- VIN Terminal -->
+  <div class="comp comp-term" style="left:10px; top:175px; width:70px;">
+    <div class="comp-body">
+      <span class="comp-desig">VIN</span>
+      <span class="comp-type">12V Input</span>
+    </div>
+  </div>
+
+  <!-- 3V3 Terminal -->
+  <div class="comp comp-term" style="left:10px; top:115px; width:70px;">
+    <div class="comp-body">
+      <span class="comp-desig">3V3</span>
+      <span class="comp-type">Enable Source</span>
+    </div>
+  </div>
+
+  <!-- C1 Input Cap -->
+  <div class="comp comp-passive" style="left:145px; top:340px; width:30px;">
+    <div class="comp-body">
+      <span class="comp-desig">C1</span>
+      <span class="comp-type">10µF 16V</span>
+    </div>
+  </div>
+
+  <!-- U3 MP2307DN -->
+  <div class="comp comp-ic" style="left:340px; top:250px; width:140px;">
+    <div class="comp-body">
+      <span class="comp-desig">U3</span>
+      <span class="comp-type">MP2307DN-5.0 SOP-8</span>
+      <div class="comp-pins">
+        <div class="comp-pin"><span class="pin-num">Pin 1 VIN</span><span class="pin-net" style="color:#d93025">← VIN_12V</span></div>
+        <div class="comp-pin"><span class="pin-num">Pin 2 EN</span><span class="pin-net" style="color:#34a853">← 3V3 via R7</span></div>
+        <div class="comp-pin"><span class="pin-num">Pin 3 SW</span><span class="pin-net" style="color:#f9ab00">→ SW node</span></div>
+        <div class="comp-pin"><span class="pin-num">Pin 4 GND</span><span class="pin-net" style="color:#666">→ GND</span></div>
+        <div class="comp-pin"><span class="pin-num">Pin 5 BOOT</span><span class="pin-net" style="color:#f9ab00">→ C11 → SW</span></div>
+        <div class="comp-pin"><span class="pin-num">Pin 6 RT/CT</span><span class="pin-net" style="color:#999">→ R24 → GND</span></div>
+        <div class="comp-pin"><span class="pin-num">Pin 7 FB</span><span class="pin-net" style="color:#666">→ GND (fixed)</span></div>
+        <div class="comp-pin"><span class="pin-num">Pin 8 GND</span><span class="pin-net" style="color:#666">→ GND</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- R7 EN pull-up -->
+  <div class="comp comp-passive" style="left:285px; top:420px; width:30px;">
+    <div class="comp-body">
+      <span class="comp-desig">R7</span>
+      <span class="comp-type">100kΩ</span>
+    </div>
+  </div>
+
+  <!-- L1 Inductor -->
+  <div class="comp comp-ind" style="left:540px; top:260px; width:60px;">
+    <div class="comp-body">
+      <span class="comp-desig">L1</span>
+      <span class="comp-type">10µH Shielded</span>
+    </div>
+  </div>
+
+  <!-- D9 Schottky -->
+  <div class="comp comp-diode" style="left:660px; top:260px; width:100px;">
+    <div class="comp-body">
+      <span class="comp-desig">D9</span>
+      <span class="comp-type">SS34 Schottky (SMA)</span>
+    </div>
+  </div>
+
+  <!-- C11 Bootstrap -->
+  <div class="comp comp-passive" style="left:465px; top:340px; width:30px;">
+    <div class="comp-body">
+      <span class="comp-desig">C11</span>
+      <span class="comp-type">100nF</span>
+    </div>
+  </div>
+
+  <!-- R24 RT/CT -->
+  <div class="comp comp-passive" style="left:465px; top:500px; width:30px;">
+    <div class="comp-body">
+      <span class="comp-desig">R24</span>
+      <span class="comp-type">22kΩ</span>
+    </div>
+  </div>
+
+  <!-- C9 Output Cap -->
+  <div class="comp comp-passive" style="left:765px; top:340px; width:30px;">
+    <div class="comp-body">
+      <span class="comp-desig">C9</span>
+      <span class="comp-type">22µF 16V</span>
+    </div>
+  </div>
+
+  <!-- C10 Output Decoupling -->
+  <div class="comp comp-passive" style="left:805px; top:340px; width:30px;">
+    <div class="comp-body">
+      <span class="comp-desig">C10</span>
+      <span class="comp-type">100nF 16V</span>
+    </div>
+  </div>
+
+  <!-- VOUT Terminal -->
+  <div class="comp comp-term" style="left:860px; top:175px; width:30px;">
+    <div class="comp-body">
+      <span class="comp-desig">OUT</span>
+      <span class="comp-type">5V</span>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- INFO BOXES -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+
+  <div class="info-box" style="left:10px; top:560px;">
+    <strong>📋 External Components (7 total)</strong><br>
+    <code>L1</code> 10µH shielded inductor (6030 SMD)<br>
+    <code>D9</code> SS34 Schottky diode (SMA)<br>
+    <code>C1</code> 10µF 16V input cap (0805)<br>
+    <code>C9</code> 22µF 16V output cap (1206)<br>
+    <code>C10</code> 100nF 16V output decoupling (0805)<br>
+    <code>C11</code> 100nF bootstrap cap (0805)<br>
+    <code>R7</code> 100kΩ EN pull-up (0805)<br>
+    <code>R24</code> 22kΩ frequency-set (0805)
+  </div>
+
+  <div class="info-box" style="left:310px; top:560px;">
+    <strong>⚡ Key Specifications</strong><br>
+    Input: 4.75V – 23V (12V nominal)<br>
+    Output: 5.0V fixed (±1%)<br>
+    Max current: 3.0A<br>
+    Frequency: ~550kHz (R24=22kΩ)<br>
+    Efficiency: ~88% at 12V→5V/2A<br>
+    Quiescent current: 1.2mA<br>
+    Shutdown current: 0.1µA (EN=GND)
+  </div>
+
+  <div class="info-box" style="left:600px; top:560px;">
+    <strong>🔧 Pin Function Notes</strong><br>
+    <code>VIN</code> — Unregulated 12V input (after fuse)<br>
+    <code>EN</code> — Enable: HIGH=on, LOW=shutdown. Tie to 3V3 via 100kΩ.<br>
+    <code>SW</code> — Switch node: connects to inductor. NOISY — keep trace short!<br>
+    <code>BOOT</code> — Bootstrap: 100nF cap between BOOT and SW.<br>
+    <code>RT/CT</code> — Timing resistor to GND sets switching frequency.<br>
+    <code>FB</code> — Feedback: tied to GND for fixed 5V output.<br>
+    <code>GND</code> — Pins 4 &amp; 8: connect to solid GND plane.
+  </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <div class="legend-title">Wire Colors</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#d93025"></div> 12V Input</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f9ab00"></div> SW / BOOT</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f0883e"></div> 5V Output</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#34a853"></div> 3V3 Enable</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#666"></div> GND</div>
+  </div>
+</div>
+
+</body>
+</html>

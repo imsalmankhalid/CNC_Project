@@ -1,4 +1,4 @@
-"""
+b"""
 MbW Lathe System – Raspberry Pi Port
 Machine Configuration  (mirrors the Arduino "User Variables" section)
 
