@@ -1,0 +1,339 @@
+{
+    "$schema": "https://schemas.kicad.org/drc.v1.json",
+    "coordinate_units": "mm",
+    "date": "2026-08-11T17:44:22",
+    "ignored_checks": [
+        {
+            "description": "Footprint has no courtyard defined",
+            "key": "missing_courtyard"
+        },
+        {
+            "description": "Track endpoint not centered on via",
+            "key": "track_not_centered_on_via"
+        },
+        {
+            "description": "Tuning profile track geometries",
+            "key": "tuning_profile_track_geometries"
+        },
+        {
+            "description": "Footprint doesn't match symbol's footprint filters",
+            "key": "footprint_filters_mismatch"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "key": "pth_inside_courtyard"
+        },
+        {
+            "description": "NPTH inside courtyard",
+            "key": "npth_inside_courtyard"
+        }
+    ],
+    "included_severities": [
+        "error"
+    ],
+    "kicad_version": "10.0.4",
+    "schematic_parity": [],
+    "source": "hat.kicad_pcb",
+    "unconnected_items": [],
+    "violations": [
+        {
+            "description": "Thermal relief connection to zone incomplete (layer B.Cu; zone min spoke count 2; actual 1)",
+            "items": [
+                {
+                    "description": "Zone [GND] on B.Cu, priority 1",
+                    "pos": {
+                        "x": 83.0,
+                        "y": 34.0
+                    },
+                    "uuid": "8afa37a0-e549-4c60-9242-c475d14b02c9"
+                },
+                {
+                    "description": "PTH pad 6 [GND] of J1",
+                    "pos": {
+                        "x": 113.45,
+                        "y": 46.23
+                    },
+                    "uuid": "ecc3866d-34e0-4c6c-bbfb-a586cd6e04aa"
+                }
+            ],
+            "severity": "error",
+            "type": "starved_thermal"
+        },
+        {
+            "description": "Thermal relief connection to zone incomplete (layer F.Cu; zone min spoke count 2; actual 1)",
+            "items": [
+                {
+                    "description": "Zone [GND] on F.Cu, priority 0",
+                    "pos": {
+                        "x": 83.0,
+                        "y": 34.0
+                    },
+                    "uuid": "78b1cb8d-9680-4168-8209-917df8e7d87f"
+                },
+                {
+                    "description": "PTH pad 2 [GND] of U6",
+                    "pos": {
+                        "x": 105.54,
+                        "y": 72.0
+                    },
+                    "uuid": "06cf804a-22fb-4f89-9108-1c30808fec13"
+                }
+            ],
+            "severity": "error",
+            "type": "starved_thermal"
+        },
+        {
+            "description": "Thermal relief connection to zone incomplete (layer B.Cu; zone min spoke count 2; actual 1)",
+            "items": [
+                {
+                    "description": "Zone [GND] on B.Cu, priority 1",
+                    "pos": {
+                        "x": 83.0,
+                        "y": 34.0
+                    },
+                    "uuid": "8afa37a0-e549-4c60-9242-c475d14b02c9"
+                },
+                {
+                    "description": "PTH pad 9 [GND] of J1",
+                    "pos": {
+                        "x": 118.53,
+                        "y": 48.77
+                    },
+                    "uuid": "7daf5800-84fa-4f9a-9407-b3d4a28228f6"
+                }
+            ],
+            "severity": "error",
+            "type": "starved_thermal"
+        },
+        {
+            "description": "Thermal relief connection to zone incomplete (layer F.Cu; zone min spoke count 2; actual 1)",
+            "items": [
+                {
+                    "description": "Zone [GND] on F.Cu, priority 0",
+                    "pos": {
+                        "x": 83.0,
+                        "y": 34.0
+                    },
+                    "uuid": "78b1cb8d-9680-4168-8209-917df8e7d87f"
+                },
+                {
+                    "description": "PTH pad 6 [GND] of J1",
+                    "pos": {
+                        "x": 113.45,
+                        "y": 46.23
+                    },
+                    "uuid": "ecc3866d-34e0-4c6c-bbfb-a586cd6e04aa"
+                }
+            ],
+            "severity": "error",
+            "type": "starved_thermal"
+        },
+        {
+            "description": "Thermal relief connection to zone incomplete (layer B.Cu; zone min spoke count 2; actual 1)",
+            "items": [
+                {
+                    "description": "Zone [GND] on B.Cu, priority 1",
+                    "pos": {
+                        "x": 83.0,
+                        "y": 34.0
+                    },
+                    "uuid": "8afa37a0-e549-4c60-9242-c475d14b02c9"
+                },
+                {
+                    "description": "PTH pad 14 [GND] of J1",
+                    "pos": {
+                        "x": 123.61,
+                        "y": 46.23
+                    },
+                    "uuid": "c3a9c7d8-16b1-42b0-bcf4-dc4e1e7633a2"
+                }
+            ],
+            "severity": "error",
+            "type": "starved_thermal"
+        },
+        {
+            "description": "Thermal relief connection to zone incomplete (layer F.Cu; zone min spoke count 2; actual 1)",
+            "items": [
+                {
+                    "description": "Zone [GND] on F.Cu, priority 0",
+                    "pos": {
+                        "x": 83.0,
+                        "y": 34.0
+                    },
+                    "uuid": "78b1cb8d-9680-4168-8209-917df8e7d87f"
+                },
+                {
+                    "description": "PTH pad 14 [GND] of J1",
+                    "pos": {
+                        "x": 123.61,
+                        "y": 46.23
+                    },
+                    "uuid": "c3a9c7d8-16b1-42b0-bcf4-dc4e1e7633a2"
+                }
+            ],
+            "severity": "error",
+            "type": "starved_thermal"
+        },
+        {
+            "description": "Thermal relief connection to zone incomplete (layer B.Cu; zone min spoke count 2; actual 1)",
+            "items": [
+                {
+                    "description": "Zone [GND] on B.Cu, priority 1",
+                    "pos": {
+                        "x": 83.0,
+                        "y": 34.0
+                    },
+                    "uuid": "8afa37a0-e549-4c60-9242-c475d14b02c9"
+                },
+                {
+                    "description": "PTH pad 20 [GND] of J1",
+                    "pos": {
+                        "x": 131.23,
+                        "y": 46.23
+                    },
+                    "uuid": "09ce0373-774e-4f69-8c1f-2af1ff69371d"
+                }
+            ],
+            "severity": "error",
+            "type": "starved_thermal"
+        },
+        {
+            "description": "Thermal relief connection to zone incomplete (layer B.Cu; zone min spoke count 2; actual 1)",
+            "items": [
+                {
+                    "description": "Zone [GND] on B.Cu, priority 1",
+                    "pos": {
+                        "x": 83.0,
+                        "y": 34.0
+                    },
+                    "uuid": "8afa37a0-e549-4c60-9242-c475d14b02c9"
+                },
+                {
+                    "description": "PTH pad 25 [GND] of J1",
+                    "pos": {
+                        "x": 138.85,
+                        "y": 48.77
+                    },
+                    "uuid": "e8223283-81a0-4874-8cf8-56404f06c1a5"
+                }
+            ],
+            "severity": "error",
+            "type": "starved_thermal"
+        },
+        {
+            "description": "Thermal relief connection to zone incomplete (layer F.Cu; zone min spoke count 2; actual 1)",
+            "items": [
+                {
+                    "description": "Zone [GND] on F.Cu, priority 0",
+                    "pos": {
+                        "x": 83.0,
+                        "y": 34.0
+                    },
+                    "uuid": "78b1cb8d-9680-4168-8209-917df8e7d87f"
+                },
+                {
+                    "description": "PTH pad 20 [GND] of J1",
+                    "pos": {
+                        "x": 131.23,
+                        "y": 46.23
+                    },
+                    "uuid": "09ce0373-774e-4f69-8c1f-2af1ff69371d"
+                }
+            ],
+            "severity": "error",
+            "type": "starved_thermal"
+        },
+        {
+            "description": "Thermal relief connection to zone incomplete (layer B.Cu; zone min spoke count 2; actual 1)",
+            "items": [
+                {
+                    "description": "Zone [GND] on B.Cu, priority 1",
+                    "pos": {
+                        "x": 83.0,
+                        "y": 34.0
+                    },
+                    "uuid": "8afa37a0-e549-4c60-9242-c475d14b02c9"
+                },
+                {
+                    "description": "PTH pad 30 [GND] of J1",
+                    "pos": {
+                        "x": 143.93,
+                        "y": 46.23
+                    },
+                    "uuid": "81adb12b-7328-4379-b45b-67198a98ebaa"
+                }
+            ],
+            "severity": "error",
+            "type": "starved_thermal"
+        },
+        {
+            "description": "Thermal relief connection to zone incomplete (layer F.Cu; zone min spoke count 2; actual 1)",
+            "items": [
+                {
+                    "description": "Zone [GND] on F.Cu, priority 0",
+                    "pos": {
+                        "x": 83.0,
+                        "y": 34.0
+                    },
+                    "uuid": "78b1cb8d-9680-4168-8209-917df8e7d87f"
+                },
+                {
+                    "description": "PTH pad 30 [GND] of J1",
+                    "pos": {
+                        "x": 143.93,
+                        "y": 46.23
+                    },
+                    "uuid": "81adb12b-7328-4379-b45b-67198a98ebaa"
+                }
+            ],
+            "severity": "error",
+            "type": "starved_thermal"
+        },
+        {
+            "description": "Thermal relief connection to zone incomplete (layer B.Cu; zone min spoke count 2; actual 1)",
+            "items": [
+                {
+                    "description": "Zone [GND] on B.Cu, priority 1",
+                    "pos": {
+                        "x": 83.0,
+                        "y": 34.0
+                    },
+                    "uuid": "8afa37a0-e549-4c60-9242-c475d14b02c9"
+                },
+                {
+                    "description": "PTH pad 34 [GND] of J1",
+                    "pos": {
+                        "x": 149.01,
+                        "y": 46.23
+                    },
+                    "uuid": "a75c1b1b-d28b-4bb2-9cc8-91867dc54cd1"
+                }
+            ],
+            "severity": "error",
+            "type": "starved_thermal"
+        },
+        {
+            "description": "Thermal relief connection to zone incomplete (layer F.Cu; zone min spoke count 2; actual 1)",
+            "items": [
+                {
+                    "description": "Zone [GND] on F.Cu, priority 0",
+                    "pos": {
+                        "x": 83.0,
+                        "y": 34.0
+                    },
+                    "uuid": "78b1cb8d-9680-4168-8209-917df8e7d87f"
+                },
+                {
+                    "description": "PTH pad 34 [GND] of J1",
+                    "pos": {
+                        "x": 149.01,
+                        "y": 46.23
+                    },
+                    "uuid": "a75c1b1b-d28b-4bb2-9cc8-91867dc54cd1"
+                }
+            ],
+            "severity": "error",
+            "type": "starved_thermal"
+        }
+    ]
+}
